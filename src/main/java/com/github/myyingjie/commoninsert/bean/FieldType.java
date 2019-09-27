@@ -33,14 +33,14 @@ public enum  FieldType implements ConvertStrategy {
     DATE("Date"){
         @Override
         public Object convert(String value) {
-            return LocalDate.parse(value, DateUtils.yyyyMMdd);
+            return "'" + value + "'";
         }
     },
 
     DATETIME("DateTime"){
         @Override
         public Object convert(String value) {
-            return LocalDateTime.parse(value, DateUtils.dateTimeFormatter);
+            return "'" + value + "'";
         }
     },
 

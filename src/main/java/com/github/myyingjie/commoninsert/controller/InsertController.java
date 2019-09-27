@@ -6,6 +6,7 @@ import java.util.LinkedHashMap;
 import com.alibaba.fastjson.JSON;
 import com.github.myyingjie.commoninsert.bean.InsertParam;
 import com.github.myyingjie.commoninsert.service.InsertService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
  * created by Yingjie Zheng at 2019-09-27 10:33
  */
 @Controller
+@Slf4j
 public class InsertController {
 
     @Autowired
@@ -26,9 +28,7 @@ public class InsertController {
     @ResponseBody
     @RequestMapping(value = "insert",method = RequestMethod.POST)
     public Object insert(@RequestBody InsertParam insertParam){
-
-        String s = JSON.toJSONString(insertParam);
-        System.out.println(s);
+        log.info("InsertParam:{}", JSON.toJSONString(insertParam));
         int insert = 0;
         try {
             insert = insertService.insert(insertParam);
