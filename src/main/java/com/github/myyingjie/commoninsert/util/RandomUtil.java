@@ -15,11 +15,11 @@ public class RandomUtil {
      * 如果有最大最小值限制则必定返回一个数字
      * 如果没有则返回10位任意字符的字符串
      */
-    public static String createRandomKey(Random random, String minVal, String maxVal,boolean isNum) {
+    public static String createRandomKey(Random random, String minVal, String maxVal, boolean isNum) {
         //长度无限制
         if (ConStant.ANY2.equals(minVal) && ConStant.ANY2.equals(maxVal)) {
             //任意字符
-            return randomStr(random, 10,isNum);
+            return randomStr(random, 10, isNum);
         }
 
         BigDecimal max = new BigDecimal(maxVal);
@@ -80,18 +80,22 @@ public class RandomUtil {
     }
 
 
-    public static String createRandomKey(Random random, String minVal, String maxVal, int len,boolean isNum) {
+    public static String createRandomKey(Random random, String minVal, String maxVal, int len, boolean isNum) {
         //长度无限制
         if (ConStant.ANY2.equals(minVal) && ConStant.ANY2.equals(maxVal)) {
             //任意字符
-            return randomStr(random, len,isNum);
+            return randomStr(random, len, isNum);
         }
-        String randomKey = createRandomKey(random, minVal, maxVal,isNum);
+        String randomKey = createRandomKey(random, minVal, maxVal, isNum);
         return appendHeadZero(randomKey, len);
     }
 
     public static void main(String[] args) {
         System.out.println(appendHeadZero("12232", 3));
+        for (int i = 0; i < 100; i++) {
+
+            System.out.println(new Random().nextDouble());
+        }
     }
 
 

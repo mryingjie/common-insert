@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -280,7 +281,7 @@ public class InsertServiceImpl implements InsertService {
             sb.append(fieldType.convert(values[random.nextInt(values.length)]));
 
         } else if (InsertRule.RANDOM.equals(insertRule)) {
-            //随机值  //类型|长度|最大值|最小值|是否固定位数|前缀|后缀|是否唯一|是否是纯数字
+            //随机值  //类型|长度|最大值|最小值|是否固定位数|前缀|后缀|是否唯一|是否是纯数字|几位小数
             String prefix = valueSchema[5];
             String suffix = valueSchema[6];
             boolean isUnique = Boolean.parseBoolean(valueSchema[7]);
@@ -303,15 +304,24 @@ public class InsertServiceImpl implements InsertService {
             boolean isNum = Boolean.parseBoolean(valueSchema[8]);
             String randomKey;
             do {
-                if (isFixedLength) {
-                    //固定位数 不能是数字类型
-                    randomKey = RandomUtil.createRandomKey(random, valueSchema[3], valueSchema[2], len, isNum);
-                } else {
-                    //不固定位数
-                    if (len != -1) {
-                        randomKey = RandomUtil.createRandomKey(random, valueSchema[3], valueSchema[2], random.nextInt(len) + 1, isNum);
+                if(FieldType.DOUBLE.equals(fieldType) || FieldType.DECIMAL.equals(fieldType)){
+                    //小数
+                    BigDecimal min = new BigDecimal(valueSchema[3]);
+                    BigDecimal max = new BigDecimal(valueSchema[2]);
+
+                    BigDecimal bigDecimal = new BigDecimal(random.nextDouble()).multiply(max.subtract(min)).add(min).setScale(Integer.parseInt(valueSchema[9]),BigDecimal.ROUND_DOWN);
+                    randomKey = bigDecimal.toString();
+                }else{
+                    if (isFixedLength) {
+                        //固定位数 不能是数字类型
+                        randomKey = RandomUtil.createRandomKey(random, valueSchema[3], valueSchema[2], len, isNum);
                     } else {
-                        randomKey = RandomUtil.createRandomKey(random, valueSchema[3], valueSchema[2], isNum);
+                        //不固定位数
+                        if (len != -1) {
+                            randomKey = RandomUtil.createRandomKey(random, valueSchema[3], valueSchema[2], random.nextInt(len) + 1, isNum);
+                        } else {
+                            randomKey = RandomUtil.createRandomKey(random, valueSchema[3], valueSchema[2], isNum);
+                        }
                     }
                 }
             } while (set.contains(randomKey) && isUnique);

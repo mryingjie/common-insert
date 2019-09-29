@@ -1,10 +1,6 @@
 package com.github.myyingjie.commoninsert.bean;
 
 import com.github.myyingjie.commoninsert.strategy.ConvertStrategy;
-import com.heitaox.sql.executor.core.util.DateUtils;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -60,7 +56,7 @@ public enum  FieldType implements ConvertStrategy {
     DECIMAL("Decimal"){
         @Override
         public Object convert(String value) {
-            return new BigDecimal(value);
+            return value;
         }
     };
 
