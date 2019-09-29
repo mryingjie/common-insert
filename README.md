@@ -71,7 +71,7 @@ password : 同上这里填写密码，如果不需要不用填
 host : 数据库的地址，如果是文件类型的数据源则不用填  
 port : 数据库的端口，如果是文件类型的数据源则不用填，mysql默认是3306 mongo默认是27017 es默认是9200  
 database : 数据库名，es中可以不用填
-tableName : 表名，mongo中称为collection，es中称为index
+tableName : 表名，mongo中称为collection，es中称为index  
 type : 数据源的类型，目前支持 mysql、es、mongo、excel(csv,xls,xlsx)  
 filePath : 如果使用的是excel的数据源,请填写文件所在路径，需要定义好表头数据  
 increase : 需要自增的字段,本质是个Map或叫字典也行，以下类同。key是要插入的字段名，value是规则。规则: 类型|从几开始|位数|前缀|后缀  
