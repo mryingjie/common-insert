@@ -42,6 +42,23 @@
         </dependency>
 
         <dependency>
+            <groupId>com.github.mryingjie</groupId>
+            <artifactId>sql-executor-core</artifactId>
+            <version>1.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.mryingjie</groupId>
+            <artifactId>sql-executor-elasticsearch</artifactId>
+            <version>1.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.mryingjie</groupId>
+            <artifactId>sql-executor-mongo</artifactId>
+            <version>1.1</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
             <version>1.2.58</version>

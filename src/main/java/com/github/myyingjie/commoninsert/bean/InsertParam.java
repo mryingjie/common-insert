@@ -25,6 +25,10 @@ public class InsertParam {
 
     private int num;
 
+    private String type;
+
+    private String filePath;
+
     private LinkedHashMap<String,String> increase;
 
     private LinkedHashMap<String,String> randomField;

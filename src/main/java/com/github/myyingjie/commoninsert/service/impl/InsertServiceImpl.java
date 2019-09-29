@@ -1,15 +1,13 @@
 package com.github.myyingjie.commoninsert.service.impl;
 
 import com.alibaba.fastjson.JSON;
-import com.github.myyingjie.commoninsert.bean.ConStant;
-import com.github.myyingjie.commoninsert.bean.FieldType;
-import com.github.myyingjie.commoninsert.bean.InsertRule;
-import com.github.myyingjie.commoninsert.bean.InsertParam;
+import com.github.myyingjie.commoninsert.bean.*;
 import com.github.myyingjie.commoninsert.service.InsertService;
 import com.github.myyingjie.commoninsert.util.RandomUtil;
 import com.heitaox.sql.executor.SQLExecutor;
 import com.heitaox.sql.executor.core.entity.Tuple2;
 import com.heitaox.sql.executor.core.util.DateUtils;
+import com.heitaox.sql.executor.source.DataSource;
 import com.heitaox.sql.executor.source.rdbms.RDBMSDataSourceProperties;
 import com.heitaox.sql.executor.source.rdbms.StandardSqlDataSource;
 import lombok.extern.slf4j.Slf4j;
@@ -92,12 +90,14 @@ public class InsertServiceImpl implements InsertService {
 
     @Override
     public int insert(InsertParam insertParam) throws IOException, SQLException {
-        log.info("准备数据源");
+        log.info("准备数据源,type:{}",insertParam.getType());
+        DataSource dataSource = DataSourceType
+                .getByType(insertParam.getType())
+                .createDataSource(insertParam);
         //准备数据源
-        RDBMSDataSourceProperties rdbmsDataSourceProperties = prepareDataSource(insertParam);
         SQLExecutor.SQLExecutorBuilder builder = new SQLExecutor.SQLExecutorBuilder();
         SQLExecutor sqlExecutor = builder
-                .putDataSource(insertParam.getTableName(), new StandardSqlDataSource(rdbmsDataSourceProperties))
+                .putDataSource(insertParam.getTableName(), dataSource)
                 .build();
         //拼接sql
         String sql = spliceSql(insertParam);
@@ -347,20 +347,7 @@ public class InsertServiceImpl implements InsertService {
         }
     }
 
-    private RDBMSDataSourceProperties prepareDataSource(InsertParam insertParam) {
-        RDBMSDataSourceProperties dataSourceProperties = new RDBMSDataSourceProperties();
-        String host = insertParam.getHost();
-        int port = insertParam.getPort();
-        String database = insertParam.getDatabase();
-        dataSourceProperties.setUrl("jdbc:mysql://" + host + ":" + port + "/" + database + "?useUnicode=true&characterEncoding=utf8&autoReconnect=true&failOverReadOnly=false&autoReconnect=true&failOverReadOnly=false&serverTimezone=GMT%2B8");
-        dataSourceProperties.setUsername(insertParam.getUserName());
-        dataSourceProperties.setPassword(insertParam.getPassword());
-        dataSourceProperties.setDriverClass("com.mysql.cj.jdbc.Driver");
-        dataSourceProperties.setInitialSize(5);
-        dataSourceProperties.setTestOnReturn(false);
-        dataSourceProperties.setMinEvictableIdleTimeMillis(50000L);
-        return dataSourceProperties;
-    }
+
 
 
 }

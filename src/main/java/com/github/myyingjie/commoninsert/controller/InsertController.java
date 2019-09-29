@@ -26,9 +26,23 @@ public class InsertController {
     private InsertService insertService;
 
     @ResponseBody
-    @RequestMapping(value = "insert",method = RequestMethod.POST)
-    public Object insert(@RequestBody InsertParam insertParam){
-        log.info("InsertParam:{}", JSON.toJSONString(insertParam));
+    @RequestMapping(value = "mysql",method = RequestMethod.POST)
+    public Object mysql(@RequestBody InsertParam insertParam){
+        log.info("datasource: {} ,InsertParam:{}", "mysql",JSON.toJSONString(insertParam));
+        int insert = 0;
+        try {
+            insert = insertService.insert(insertParam);
+        } catch (IOException | SQLException e) {
+            log.error(e.getMessage(),e);
+        }
+
+        return insert;
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "es",method = RequestMethod.POST)
+    public Object es(@RequestBody InsertParam insertParam){
+        log.info("datasource: {},InsertParam:{}","es", JSON.toJSONString(insertParam));
         int insert = 0;
         try {
             insert = insertService.insert(insertParam);
@@ -38,5 +52,22 @@ public class InsertController {
 
         return insert;
     }
+
+
+    @ResponseBody
+    @RequestMapping(value = "mongo",method = RequestMethod.POST)
+    public Object mongo(@RequestBody InsertParam insertParam){
+        log.info("datasource: {},InsertParam:{}","mongo", JSON.toJSONString(insertParam));
+        int insert = 0;
+        try {
+            insert = insertService.insert(insertParam);
+        } catch (IOException | SQLException e) {
+            e.printStackTrace();
+        }
+
+        return insert;
+    }
+
+
 
 }
