@@ -31,9 +31,9 @@ public class InsertParam {
 
     private LinkedHashMap<String,String> increase;
 
-    private LinkedHashMap<String,String> randomField;
+    private LinkedHashMap<String,String> random;
 
-    private LinkedHashMap<String,String> constantField;
+    private LinkedHashMap<String,String> constant;
 
 
 }

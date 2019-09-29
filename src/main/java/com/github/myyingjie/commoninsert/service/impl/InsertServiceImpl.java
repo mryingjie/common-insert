@@ -8,8 +8,6 @@ import com.heitaox.sql.executor.SQLExecutor;
 import com.heitaox.sql.executor.core.entity.Tuple2;
 import com.heitaox.sql.executor.core.util.DateUtils;
 import com.heitaox.sql.executor.source.DataSource;
-import com.heitaox.sql.executor.source.rdbms.RDBMSDataSourceProperties;
-import com.heitaox.sql.executor.source.rdbms.StandardSqlDataSource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -45,7 +43,7 @@ public class InsertServiceImpl implements InsertService {
         random.put("updateDate", "Date|-1|2019-09-01|2019-09-30|false|-1|-1|false|false");
         random.put("updateDateTime", "DateTime|-1|2019-09-30 00:00:00|2019-09-01 00:00:00|false|-1|-1|false");
 
-        insertParam1.setRandomField(random);
+        insertParam1.setRandom(random);
 
 
         LinkedHashMap<String, String> increase = new LinkedHashMap<>();
@@ -61,7 +59,7 @@ public class InsertServiceImpl implements InsertService {
         LinkedHashMap<String, String> constant = new LinkedHashMap<>();
         constant.put("constant", "String|星宿老仙");
         constant.put("sex", "String|男,女");
-        insertParam1.setConstantField(constant);
+        insertParam1.setConstant(constant);
         System.out.println(JSON.toJSONString(insertParam1));
 
         Tuple2<String[], InsertRule> insertRuleTuple2 = new Tuple2<>(new String[]{"sa", "sd", "34"}, InsertRule.CONSTANT);
@@ -113,14 +111,14 @@ public class InsertServiceImpl implements InsertService {
         // 插入字段
         List<Tuple2<String[], InsertRule>> fieldValueIndex = new ArrayList<>();
 
-        LinkedHashMap<String, String> constantField = insertParam.getConstantField();
+        LinkedHashMap<String, String> constantField = insertParam.getConstant();
         for (Map.Entry<String, String> entry : constantField.entrySet()) {
             String field = entry.getKey();
             sb.append(field).append(", ");
             fieldValueIndex.add(new Tuple2<>(entry.getValue().split(ConStant.SEPARATOR), InsertRule.CONSTANT));
         }
 
-        LinkedHashMap<String, String> randomField = insertParam.getRandomField();
+        LinkedHashMap<String, String> randomField = insertParam.getRandom();
         for (Map.Entry<String, String> entry : randomField.entrySet()) {
             String field = entry.getKey();
             sb.append(field).append(", ");

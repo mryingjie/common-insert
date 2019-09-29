@@ -1,7 +1,6 @@
 package com.github.myyingjie.commoninsert.controller;
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.LinkedHashMap;
 
 import com.alibaba.fastjson.JSON;
 import com.github.myyingjie.commoninsert.bean.InsertParam;

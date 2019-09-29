@@ -9,7 +9,6 @@ import com.heitaox.sql.executor.source.rdbms.StandardSqlDataSource;
 import com.mongodb.ServerAddress;
 import org.apache.http.HttpHost;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -24,7 +23,7 @@ public enum DataSourceType {
         public DataSource createDataSource(InsertParam insertParam) {
             RDBMSDataSourceProperties dataSourceProperties = new RDBMSDataSourceProperties();
             String host = insertParam.getHost();
-            int port = insertParam.getPort();
+            int port = insertParam.getPort() == 0 ? 3306 : insertParam.getPort();
             String database = insertParam.getDatabase();
             dataSourceProperties.setUrl("jdbc:mysql://" + host + ":" + port + "/" + database + "?useUnicode=true&characterEncoding=utf8&autoReconnect=true&failOverReadOnly=false&autoReconnect=true&failOverReadOnly=false&serverTimezone=GMT%2B8");
             dataSourceProperties.setUsername(insertParam.getUserName());
@@ -53,7 +52,7 @@ public enum DataSourceType {
     MONGO("mongo") {
         @Override
         public DataSource createDataSource(InsertParam param) {
-            int port = param.getPort() == 0 ? 9200 : param.getPort();
+            int port = param.getPort() == 0 ? 27017 : param.getPort();
             String[] split = param.getHost().split(",");
             List<ServerAddress> hosts = Stream.of(split)
                     .map(host -> new ServerAddress(host, port))
@@ -65,7 +64,7 @@ public enum DataSourceType {
     EXCEL("excel") {
         @Override
         public DataSource createDataSource(InsertParam param) {
-            return  new ExcelDataSource(param.getFilePath(), null);
+            return new ExcelDataSource(param.getFilePath(), null);
         }
     };
 
@@ -85,7 +84,7 @@ public enum DataSourceType {
             }
 
         }
-        throw new RuntimeException("not support this type of data source");
+        throw new RuntimeException("not support this type of data source:[{" + type + "}]");
     }
 
 }
