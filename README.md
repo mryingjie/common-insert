@@ -97,3 +97,9 @@ Double
 Date  
 DateTime  
 Decimal
+
+### 数据源类型
+mysql
+mongo
+es
+excel
