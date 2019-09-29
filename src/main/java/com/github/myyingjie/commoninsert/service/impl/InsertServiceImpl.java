@@ -65,6 +65,9 @@ public class InsertServiceImpl implements InsertService {
         constant.put("sex", "String|男,女");
         insertParam1.setConstantField(constant);
         System.out.println(JSON.toJSONString(insertParam1));
+
+        Tuple2<String[], InsertRule> insertRuleTuple2 = new Tuple2<>(new String[]{"sa", "sd", "34"}, InsertRule.CONSTANT);
+        System.out.println(JSON.toJSONString(insertRuleTuple2));
     }
 
 
@@ -144,16 +147,21 @@ public class InsertServiceImpl implements InsertService {
                 String[] valueSchema = valueIndex.getV1();
                 InsertRule insertRule = valueIndex.getV2();
                 FieldType fieldType = FieldType.getByValue(valueSchema[0]);
-                if (FieldType.DATE.equals(fieldType)) {
-                    //日期类型
-                    insertDateValue(sb, random, i, valueSchema, insertRule, fieldType);
-                } else if (FieldType.DATETIME.equals(fieldType)) {
-                    //日期时间类型
-                    insertDateTimeValue(sb, random, i, valueSchema, insertRule, fieldType);
-                } else {
-                    //普通类型
-                    insertCommonValue(sb, random, set, i, valueSchema, insertRule, fieldType);
+                try {
+                    if (FieldType.DATE.equals(fieldType)) {
+                        //日期类型
+                        insertDateValue(sb, random, i, valueSchema, insertRule, fieldType);
+                    } else if (FieldType.DATETIME.equals(fieldType)) {
+                        //日期时间类型
+                        insertDateTimeValue(sb, random, i, valueSchema, insertRule, fieldType);
+                    } else {
+                        //普通类型
+                        insertCommonValue(sb, random, set, i, valueSchema, insertRule, fieldType);
+                    }
+                }catch (Exception ex){
+                    log.error("data format exception error message:{} ,param:{}",ex.getMessage(),JSON.toJSONString(valueIndex),ex);
                 }
+
                 sb.append(",");
             }
             sb.deleteCharAt(sb.lastIndexOf(","));
