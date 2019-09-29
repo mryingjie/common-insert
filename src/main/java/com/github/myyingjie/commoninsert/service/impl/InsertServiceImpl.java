@@ -11,6 +11,7 @@ import com.heitaox.sql.executor.source.DataSource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.io.Console;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.SQLException;
@@ -113,25 +114,32 @@ public class InsertServiceImpl implements InsertService {
         List<Tuple2<String[], InsertRule>> fieldValueIndex = new ArrayList<>();
 
         LinkedHashMap<String, String> constantField = insertParam.getConstant();
-        for (Map.Entry<String, String> entry : constantField.entrySet()) {
-            String field = entry.getKey();
-            sb.append(field).append(", ");
-            fieldValueIndex.add(new Tuple2<>(entry.getValue().split(ConStant.SEPARATOR), InsertRule.CONSTANT));
+        if(constantField!=null){
+            for (Map.Entry<String, String> entry : constantField.entrySet()) {
+                String field = entry.getKey();
+                sb.append(field).append(", ");
+                fieldValueIndex.add(new Tuple2<>(entry.getValue().split(ConStant.SEPARATOR), InsertRule.CONSTANT));
+            }
         }
 
         LinkedHashMap<String, String> randomField = insertParam.getRandom();
-        for (Map.Entry<String, String> entry : randomField.entrySet()) {
-            String field = entry.getKey();
-            sb.append(field).append(", ");
-            fieldValueIndex.add(new Tuple2<>(entry.getValue().split(ConStant.SEPARATOR), InsertRule.RANDOM));
+        if(randomField!=null){
+            for (Map.Entry<String, String> entry : randomField.entrySet()) {
+                String field = entry.getKey();
+                sb.append(field).append(", ");
+                fieldValueIndex.add(new Tuple2<>(entry.getValue().split(ConStant.SEPARATOR), InsertRule.RANDOM));
+            }
         }
 
         LinkedHashMap<String, String> increaseField = insertParam.getIncrease();
-        for (Map.Entry<String, String> entry : increaseField.entrySet()) {
-            String field = entry.getKey();
-            sb.append(field).append(", ");
-            fieldValueIndex.add(new Tuple2<>(entry.getValue().split(ConStant.SEPARATOR), InsertRule.INCREASE));
+        if(increaseField != null){
+            for (Map.Entry<String, String> entry : increaseField.entrySet()) {
+                String field = entry.getKey();
+                sb.append(field).append(", ");
+                fieldValueIndex.add(new Tuple2<>(entry.getValue().split(ConStant.SEPARATOR), InsertRule.INCREASE));
+            }
         }
+
         sb.deleteCharAt(sb.lastIndexOf(","));
         sb.append(") ").append("VALUES");
 
@@ -306,6 +314,12 @@ public class InsertServiceImpl implements InsertService {
             do {
                 if(FieldType.DOUBLE.equals(fieldType) || FieldType.DECIMAL.equals(fieldType)){
                     //小数
+                    if(valueSchema[3].equals(ConStant.ANY2)){
+                        valueSchema[3] = "0";
+                    }
+                    if(valueSchema[2].equals(ConStant.ANY2)){
+                        valueSchema[2] = "100";
+                    }
                     BigDecimal min = new BigDecimal(valueSchema[3]);
                     BigDecimal max = new BigDecimal(valueSchema[2]);
 
