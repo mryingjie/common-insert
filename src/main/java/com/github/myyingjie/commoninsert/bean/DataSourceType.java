@@ -4,6 +4,7 @@ import com.heitaox.sql.executor.source.DataSource;
 import com.heitaox.sql.executor.source.file.ExcelDataSource;
 import com.heitaox.sql.executor.source.nosql.ElasticsearchDataSource;
 import com.heitaox.sql.executor.source.nosql.MongoDataSource;
+import com.heitaox.sql.executor.source.nosql.MongoDataSourceProperties;
 import com.heitaox.sql.executor.source.rdbms.RDBMSDataSourceProperties;
 import com.heitaox.sql.executor.source.rdbms.StandardSqlDataSource;
 import com.mongodb.ServerAddress;
@@ -57,7 +58,17 @@ public enum DataSourceType {
             List<ServerAddress> hosts = Stream.of(split)
                     .map(host -> new ServerAddress(host, port))
                     .collect(Collectors.toList());
-            return new MongoDataSource(hosts, param.getTableName());
+
+            if(param.getUserName()!=null){
+                MongoDataSourceProperties mongoDataSourceProperties = new MongoDataSourceProperties();
+                mongoDataSourceProperties.setUser(param.getUserName());
+                mongoDataSourceProperties.setPassword(param.getPassword().toCharArray());
+                mongoDataSourceProperties.setDbName(param.getDatabase());
+                mongoDataSourceProperties.setServerAddress(hosts);
+                return new MongoDataSource(mongoDataSourceProperties);
+            }
+
+            return new MongoDataSource(hosts, param.getDatabase());
         }
     },
 
