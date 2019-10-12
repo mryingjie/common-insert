@@ -22,7 +22,7 @@ public enum DataSourceType {
 
     MYSQL("mysql") {
         @Override
-        public DataSource createDataSource(DataSourceProperties insertParam) {
+        public DataSource createDataSource(DataSourceProperties insertParam) throws Exception {
             RDBMSDataSourceProperties dataSourceProperties = new RDBMSDataSourceProperties();
             String host = insertParam.getHost();
             int port = insertParam.getPort() == 0 ? 3306 : insertParam.getPort();
@@ -91,7 +91,7 @@ public enum DataSourceType {
         return this.type;
     }
 
-    public abstract DataSource createDataSource(DataSourceProperties param);
+    public abstract DataSource createDataSource(DataSourceProperties param) throws Exception;
 
     public static DataSourceType getByType(String type) {
         for (DataSourceType value : DataSourceType.values()) {

@@ -4,7 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.github.myyingjie.commoninsert.bean.DataSourceProperties;
 import com.github.myyingjie.commoninsert.strategy.DataSourceType;
 import com.github.myyingjie.commoninsert.util.JsonFormatTool;
-import com.github.myyingjie.commoninsert.util.ResourceFileUtil;
+import com.github.myyingjie.commoninsert.util.DatasourceFileUtil;
 import com.heitaox.sql.executor.SQLExecutor;
 import com.heitaox.sql.executor.core.entity.Tuple2;
 import com.heitaox.sql.executor.source.DataSource;
@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Configuration;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,13 +30,14 @@ public class SQLExecutorConfig {
 
     public Map<String, DataSourceProperties> dataSourcePropertiesMap = new ConcurrentHashMap<>();
 
-    public static final String FILE_NAME = "datasource.json";
+    public static final String DATA_SOURCE_FILE_NAME = "datasource.json";
 
     @Bean
     public SQLExecutor sqlExecutor() {
+
         SQLExecutor.SQLExecutorBuilder builder = new SQLExecutor.SQLExecutorBuilder();
         try {
-            String s = ResourceFileUtil.readResourcesJsonFile("datasource.json");
+            String s = DatasourceFileUtil.readResourcesJsonFile(DATA_SOURCE_FILE_NAME);
             List<DataSourceProperties> dataSourceProperties = JSON.parseArray(s, DataSourceProperties.class);
             for (DataSourceProperties dataSourceProperty : dataSourceProperties) {
                 String type = dataSourceProperty.getType();
@@ -64,18 +66,18 @@ public class SQLExecutorConfig {
     }
 
 
-    public void persistence(String database) throws IOException {
+    public synchronized void persistence(String database) throws IOException {
         DataSourceProperties dataSourceProperties = dataSourcePropertiesMap.get(database);
 
         if (dataSourceProperties != null) {
-            String s = ResourceFileUtil.readResourcesJsonFile(FILE_NAME);
+            String s = DatasourceFileUtil.readResourcesJsonFile(DATA_SOURCE_FILE_NAME);
+            dataSourceProperties.setPersistenced(true);
             List<DataSourceProperties> list = JSON.parseArray(s, DataSourceProperties.class);
             list.add(dataSourceProperties);
             String json = JSON.toJSONString(list);
-            dataSourceProperties.setPersistenced(true);
             try {
-                ResourceFileUtil.write(FILE_NAME, JsonFormatTool.formatJson(json));
-            }catch (IOException e){
+                DatasourceFileUtil.write(DATA_SOURCE_FILE_NAME, JsonFormatTool.formatJson(json));
+            } catch (IOException e) {
                 dataSourceProperties.setPersistenced(false);
                 throw e;
             }
@@ -85,5 +87,28 @@ public class SQLExecutorConfig {
     public static void main(String[] args) {
         Tuple2<Object, Object> tuple = new Tuple2<>("dada", 123);
         System.out.println(JSON.toJSONString(tuple));
+    }
+
+    public synchronized void persistence() throws IOException {
+        String json = "[\n" +
+                "]";
+        if (dataSourcePropertiesMap.size() != 0) {
+            json = JSON.toJSONString(dataSourcePropertiesMap.values());
+        }
+        DatasourceFileUtil.write(DATA_SOURCE_FILE_NAME, JsonFormatTool.formatJson(json));
+    }
+
+    public synchronized void persistenceDelete(String database) throws IOException {
+        String s = DatasourceFileUtil.readResourcesJsonFile(DATA_SOURCE_FILE_NAME);
+        List<DataSourceProperties> list = JSON.parseArray(s, DataSourceProperties.class);
+        list.removeIf(next -> next.getDatabase().equalsIgnoreCase(database));
+        String json = "[\n" +
+                "]";
+        if (list.size() != 0) {
+            json = JSON.toJSONString(list);
+        }
+        DatasourceFileUtil.write(DATA_SOURCE_FILE_NAME, JsonFormatTool.formatJson(json));
+
+
     }
 }

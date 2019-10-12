@@ -1,21 +1,18 @@
 package com.github.myyingjie.commoninsert.bean;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 import java.util.LinkedHashMap;
 
 /**
  * created by Yingjie Zheng at 2019-09-27 10:35
  */
-@EqualsAndHashCode(callSuper = true)
 @Data
-public class InsertParam extends DataSourceProperties{
-
-
+public class InsertParam{
 
     private String tableName;
 
+    private String database;
     /**
      * 插入的条数
      */
