@@ -1,2 +1,13 @@
 server:
   port: 9090
+
+spring:
+  sql-executor:
+    mongo:
+      enable: true
+    excel:
+      enable: true
+    rdbms:
+      enable: true
+    es:
+      enable: true

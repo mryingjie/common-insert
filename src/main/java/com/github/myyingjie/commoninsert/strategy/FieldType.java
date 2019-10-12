@@ -1,6 +1,5 @@
-package com.github.myyingjie.commoninsert.bean;
+package com.github.myyingjie.commoninsert.strategy;
 
-import com.github.myyingjie.commoninsert.strategy.ConvertStrategy;
 import java.util.HashMap;
 import java.util.Map;
 

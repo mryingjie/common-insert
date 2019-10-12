@@ -1,5 +1,6 @@
-package com.github.myyingjie.commoninsert.bean;
+package com.github.myyingjie.commoninsert.strategy;
 
+import com.github.myyingjie.commoninsert.bean.DataSourceProperties;
 import com.heitaox.sql.executor.source.DataSource;
 import com.heitaox.sql.executor.source.file.ExcelDataSource;
 import com.heitaox.sql.executor.source.nosql.ElasticsearchDataSource;
@@ -21,7 +22,7 @@ public enum DataSourceType {
 
     MYSQL("mysql") {
         @Override
-        public DataSource createDataSource(InsertParam insertParam) {
+        public DataSource createDataSource(DataSourceProperties insertParam) {
             RDBMSDataSourceProperties dataSourceProperties = new RDBMSDataSourceProperties();
             String host = insertParam.getHost();
             int port = insertParam.getPort() == 0 ? 3306 : insertParam.getPort();
@@ -39,7 +40,7 @@ public enum DataSourceType {
 
     ES("es") {
         @Override
-        public DataSource createDataSource(InsertParam param) {
+        public DataSource createDataSource(DataSourceProperties param) {
             int port = param.getPort() == 0 ? 9200 : param.getPort();
             String[] split = param.getHost().split(",");
             List<HttpHost> hosts = Stream.of(split)
@@ -52,7 +53,7 @@ public enum DataSourceType {
 
     MONGO("mongo") {
         @Override
-        public DataSource createDataSource(InsertParam param) {
+        public DataSource createDataSource(DataSourceProperties param) {
             int port = param.getPort() == 0 ? 27017 : param.getPort();
             String[] split = param.getHost().split(",");
             List<ServerAddress> hosts = Stream.of(split)
@@ -74,7 +75,7 @@ public enum DataSourceType {
 
     EXCEL("excel") {
         @Override
-        public DataSource createDataSource(InsertParam param) {
+        public DataSource createDataSource(DataSourceProperties param) {
             return new ExcelDataSource(param.getFilePath(), null);
         }
     };
@@ -86,7 +87,11 @@ public enum DataSourceType {
         this.type = type;
     }
 
-    public abstract DataSource createDataSource(InsertParam param);
+    public String getType(){
+        return this.type;
+    }
+
+    public abstract DataSource createDataSource(DataSourceProperties param);
 
     public static DataSourceType getByType(String type) {
         for (DataSourceType value : DataSourceType.values()) {

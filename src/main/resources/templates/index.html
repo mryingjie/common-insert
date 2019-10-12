@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <script src="../layui/layui.js"></script>
+    <script src="../js/jquery-1.12.4.js"></script>
+    <link rel="stylesheet" href="../layui/css/layui.css">
+    <link rel="stylesheet" href="../css/style.css">
+
+    <title>Title</title>
+    <style>
+
+
+    </style>
+</head>
+<body class="layui-layout-body">
+    <div class="layui-layout layui-layout-admin">
+        <div class="layui-header layui-bg-molv">
+            <ul class="layui-nav">
+                <li class="layui-nav-item">
+                    <a href="javascript:;">通用数据生成工具</a>
+                </li>
+                <li class="layui-nav-item" style="float: right">
+                    <a href="">https://github.com/mryingjie</a>
+                </li>
+            </ul>
+        </div>
+        <div class="layui-side layui-bg-black">
+            <ul class="layui-nav layui-nav-tree layui-bg-cyan" lay-filter="test">
+                <!-- 侧边导航: <ul class="layui-nav layui-nav-tree layui-nav-side"> -->
+                <li class="layui-nav-item layui-nav-itemed">
+                    <a href="javascript:;">选项</a>
+                    <dl class="layui-nav-child">
+                        <dd><a id="config" onclick="datasource()" href="javascript:;">数据源配置</a></dd>
+                        <dd><a id="generate" onclick="main()" href="javascript:;">数据插入表单</a></dd>
+                    </dl>
+                </li>
+            </ul>
+        </div>
+        <div class="layui-body">
+            <!-- 内容主体区域 -->
+            <iframe id="main" src="" frameborder="0" height="100%" width="100%"></iframe>
+        </div>
+    </div>
+</body>
+<script type="text/javascript">
+    $(function(){
+        layui.use('element', function () {
+            var element = layui.element;
+        });
+        var serverHost =  getServerHost();
+        $("#main").attr("src",serverHost+ "/main");
+    });
+
+    function getServerHost(){
+        //获取当前网址，
+        var curPath = window.document.location.href;
+        var pathName = window.document.location.pathname;
+        var pos = curPath.indexOf(pathName);
+        //获取主机地址
+        return curPath.substring(0, pos);
+    }
+
+    function main() {
+        var serverHost =  getServerHost();
+        $("#main").attr("src",serverHost+ "/main");
+    }
+
+    function datasource() {
+        var serverHost =  getServerHost();
+        $("#main").attr("src",serverHost+ "/datasource");
+    }
+
+
+
+</script>
+</html>

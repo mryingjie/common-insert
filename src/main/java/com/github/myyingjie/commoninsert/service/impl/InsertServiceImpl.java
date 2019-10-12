@@ -2,16 +2,21 @@ package com.github.myyingjie.commoninsert.service.impl;
 
 import com.alibaba.fastjson.JSON;
 import com.github.myyingjie.commoninsert.bean.*;
+import com.github.myyingjie.commoninsert.config.SQLExecutorConfig;
 import com.github.myyingjie.commoninsert.service.InsertService;
+import com.github.myyingjie.commoninsert.strategy.DataSourceType;
+import com.github.myyingjie.commoninsert.strategy.FieldType;
 import com.github.myyingjie.commoninsert.util.RandomUtil;
+import com.github.myyingjie.commoninsert.util.ReflectUtil;
 import com.heitaox.sql.executor.SQLExecutor;
 import com.heitaox.sql.executor.core.entity.Tuple2;
 import com.heitaox.sql.executor.core.util.DateUtils;
 import com.heitaox.sql.executor.source.DataSource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.Console;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.SQLException;
@@ -19,6 +24,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * created by Yingjie Zheng at 2019-09-27 11:12
@@ -26,6 +33,13 @@ import java.util.*;
 @Service
 @Slf4j
 public class InsertServiceImpl implements InsertService {
+
+    @Autowired
+    private SQLExecutor sqlExecutor;
+
+    @Autowired
+    private SQLExecutorConfig sqlExecutorConfig;
+
 
     public static void main(String[] args) {
         InsertParam insertParam1 = new InsertParam();
@@ -38,8 +52,7 @@ public class InsertServiceImpl implements InsertService {
         insertParam1.setPassword("zheng");
 
         LinkedHashMap<String, String> random = new LinkedHashMap<>();
-        //类型|长度|最大值|最小值|是否固定位数|前缀|后缀|是否唯一|是否是纯数字
-        random.put("age", "Integer|-1|100|20|false|-1|-1|false|true");
+        //类型|长度|最大值|最小值|是否固定位数|前缀|后缀|是否唯一|字符策略(0:任意 1:纯数字 2:纯字母 3:纯汉字 4:数字+字母 5:数字+汉字 6:字母+汉字)|小数位数        random.put("age", "Integer|-1|100|20|false|-1|-1|false|true");
         random.put("identity_no", "String|12|-1|-1|true|-1|-1|true|true");
         random.put("createDate", "Date|-1|-1|-1|false|-1|-1|false|false");
         random.put("updateDate", "Date|-1|2019-09-01|2019-09-30|false|-1|-1|false|false");
@@ -70,7 +83,7 @@ public class InsertServiceImpl implements InsertService {
 
 
     /**
-     * //类型|长度|最大值|最小值|是否固定位数|前缀|后缀|是否唯一|是否是纯数字
+     * //类型|长度|最大值|最小值|是否固定位数|前缀|后缀|是否唯一|字符策略(0:任意 1:纯数字 2:纯字母 3:纯汉字 4:数字+字母 5:数字+汉字 6:字母+汉字)|小数位数
      * random.put("age","Integer|3|100|20|false|-1|-1|false|false");
      * random.put("identity_no", "String|12|-1|-1|true|-1|-1|true|true");
      * <p>
@@ -90,21 +103,111 @@ public class InsertServiceImpl implements InsertService {
 
     @Override
     public int insert(InsertParam insertParam) throws IOException, SQLException {
-        log.info("准备数据源,type:{}",insertParam.getType());
-        DataSource dataSource = DataSourceType
-                .getByType(insertParam.getType())
-                .createDataSource(insertParam);
-        //准备数据源
-        SQLExecutor.SQLExecutorBuilder builder = new SQLExecutor.SQLExecutorBuilder();
-        SQLExecutor sqlExecutor = builder
-                .putDataSource(insertParam.getTableName(), dataSource)
-                .build();
+        String database = insertParam.getDatabase();
+        if (!sqlExecutorConfig.dataSourcePropertiesMap.containsKey(insertParam.getDatabase())) {
+            throw new RuntimeException("no data source of " + insertParam.getDatabase() + " find,Please configure the data source first ");
+        }
+        Map<String, DataSource> dataSourceMap = sqlExecutorConfig.dataSourceMap;
+        if (dataSourceMap.containsKey(database)) {
+            if (!dataSourceMap.containsKey(insertParam.getTableName())) {
+                //数据源有 但是没有和当前表相关联 先将表和库关联
+                dataSourceMap.put(insertParam.getTableName(), dataSourceMap.get(database));
+            }
+        } else {
+            //第一次加载的数据源 需要初始化并放入数据源的缓存池中
+            log.info("准备数据源,type:{}", insertParam.getType());
+            DataSource dataSource = DataSourceType
+                    .getByType(insertParam.getType())
+                    .createDataSource(insertParam);
+            dataSourceMap.put(insertParam.getDatabase(), dataSource);
+            dataSourceMap.put(insertParam.getTableName(), dataSource);
+            sqlExecutorConfig.dataSourcePropertiesMap.put(insertParam.getDatabase(), insertParam);
+        }
+
         //拼接sql
         String sql = spliceSql(insertParam);
-
         //插入数据
-        int i = sqlExecutor.executeInsert(sql);
-        return i;
+        return sqlExecutor.executeInsert(sql);
+    }
+
+    @Override
+    public List<DataSourcePropertiesVo> queryDatasource(int status) {
+        Collection<DataSourceProperties> values = sqlExecutorConfig.dataSourcePropertiesMap.values();
+        return values.stream().filter(properties -> {
+            if (status == 0) {
+                return false;
+            } else if (status == 1) {
+                //只有数据库
+                return !DataSourceType.EXCEL.getType().equalsIgnoreCase(properties.getType());
+            } else if (status == 2) {
+                //只有文件
+                return DataSourceType.EXCEL.getType().equalsIgnoreCase(properties.getType());
+            } else {
+                //全查
+                return true;
+            }
+
+        }).sorted(Comparator.comparing(DataSourceProperties::getType))
+        .map(dataSourceProperties -> {
+            DataSourcePropertiesVo dataSourcePropertiesVo = new DataSourcePropertiesVo();
+            BeanUtils.copyProperties(dataSourceProperties, dataSourcePropertiesVo);
+            ReflectUtil.setDefaultValue(dataSourcePropertiesVo, dataSourceProperties.getClass());
+            return dataSourcePropertiesVo;
+        })
+         .collect(Collectors.toList());
+    }
+
+    @Override
+    public void deleteDatasource(String database) {
+        sqlExecutorConfig.dataSourcePropertiesMap.remove(database);
+        DataSource remove = sqlExecutorConfig.dataSourceMap.get(database);
+        List<String> tableName = new ArrayList<>();
+        for (Map.Entry<String, DataSource> entry : sqlExecutorConfig.dataSourceMap.entrySet()) {
+            if (entry.getValue().equals(remove)) {
+                tableName.add(entry.getKey());
+            }
+        }
+        for (String s : tableName) {
+            sqlExecutorConfig.dataSourceMap.remove(s);
+        }
+    }
+
+    @Override
+    public void updateDatasource(DataSourceProperties dataSourceProperties) {
+        String database = dataSourceProperties.getDatabase();
+        if (!dataSourceProperties.equals(sqlExecutorConfig.dataSourcePropertiesMap.get(database))) {
+            //更新
+            sqlExecutorConfig.dataSourcePropertiesMap.put(database, dataSourceProperties);
+
+            DataSource remove = sqlExecutorConfig.dataSourceMap.get(database);
+            List<String> tableName = new ArrayList<>();
+            for (Map.Entry<String, DataSource> entry : sqlExecutorConfig.dataSourceMap.entrySet()) {
+                if (entry.getValue().equals(remove)) {
+                    tableName.add(entry.getKey());
+                }
+            }
+            DataSource dataSource = DataSourceType.getByType(dataSourceProperties.getType()).createDataSource(dataSourceProperties);
+            sqlExecutorConfig.dataSourceMap.put(database, dataSource);
+            for (String s : tableName) {
+                sqlExecutorConfig.dataSourceMap.put(s, dataSource);
+            }
+        }
+
+    }
+
+    @Override
+    public void addDatasource(DataSourceProperties dataSourceProperties) {
+        if (sqlExecutorConfig.dataSourcePropertiesMap.containsKey(dataSourceProperties.getDatabase())) {
+            throw new RuntimeException(dataSourceProperties.getDatabase()+" is already exists ，please delete it first!!");
+        }
+        DataSource dataSource = DataSourceType.getByType(dataSourceProperties.getType()).createDataSource(dataSourceProperties);
+        sqlExecutorConfig.dataSourcePropertiesMap.put(dataSourceProperties.getDatabase(), dataSourceProperties);
+        sqlExecutorConfig.dataSourceMap.put(dataSourceProperties.getDatabase(), dataSource);
+    }
+
+    @Override
+    public void persistence(String database) throws IOException {
+        sqlExecutorConfig.persistence(database);
     }
 
     private String spliceSql(InsertParam insertParam) {
@@ -114,7 +217,7 @@ public class InsertServiceImpl implements InsertService {
         List<Tuple2<String[], InsertRule>> fieldValueIndex = new ArrayList<>();
 
         LinkedHashMap<String, String> constantField = insertParam.getConstant();
-        if(constantField!=null){
+        if (constantField != null) {
             for (Map.Entry<String, String> entry : constantField.entrySet()) {
                 String field = entry.getKey();
                 sb.append(field).append(", ");
@@ -123,7 +226,7 @@ public class InsertServiceImpl implements InsertService {
         }
 
         LinkedHashMap<String, String> randomField = insertParam.getRandom();
-        if(randomField!=null){
+        if (randomField != null) {
             for (Map.Entry<String, String> entry : randomField.entrySet()) {
                 String field = entry.getKey();
                 sb.append(field).append(", ");
@@ -132,7 +235,7 @@ public class InsertServiceImpl implements InsertService {
         }
 
         LinkedHashMap<String, String> increaseField = insertParam.getIncrease();
-        if(increaseField != null){
+        if (increaseField != null) {
             for (Map.Entry<String, String> entry : increaseField.entrySet()) {
                 String field = entry.getKey();
                 sb.append(field).append(", ");
@@ -165,8 +268,8 @@ public class InsertServiceImpl implements InsertService {
                         //普通类型
                         insertCommonValue(sb, random, set, i, valueSchema, insertRule, fieldType);
                     }
-                }catch (Exception ex){
-                    log.error("data format exception error message:{} ,param:{}",ex.getMessage(),JSON.toJSONString(valueIndex),ex);
+                } catch (Exception ex) {
+                    log.error("data format exception error message:{} ,param:{}", ex.getMessage(), JSON.toJSONString(valueIndex), ex);
                 }
 
                 sb.append(",");
@@ -223,7 +326,7 @@ public class InsertServiceImpl implements InsertService {
             //自增 //类型|从几开始|位数|前缀|后缀
 
             String seed = valueSchema[1];
-            if(ConStant.ANY2.equals(seed)){
+            if (ConStant.ANY2.equals(seed)) {
                 seed = LocalDateTime.now().format(DateUtils.dateTimeFormatter);
             }
             sb.append(fieldType.convert(LocalDateTime.parse(seed, DateUtils.dateTimeFormatter).plusSeconds(i).format(DateUtils.dateTimeFormatter)));
@@ -274,7 +377,7 @@ public class InsertServiceImpl implements InsertService {
         } else {
             //自增 //类型|从几开始|位数|前缀|后缀
             String seed = valueSchema[1];
-            if(ConStant.ANY2.equals(seed)){
+            if (ConStant.ANY2.equals(seed)) {
                 seed = LocalDate.now().format(DateUtils.yyyyMMdd);
             }
             sb.append(fieldType.convert(LocalDate.parse(seed, DateUtils.yyyyMMdd).plusDays(i).format(DateUtils.yyyyMMdd)));
@@ -289,7 +392,7 @@ public class InsertServiceImpl implements InsertService {
             sb.append(fieldType.convert(values[random.nextInt(values.length)]));
 
         } else if (InsertRule.RANDOM.equals(insertRule)) {
-            //随机值  //类型|长度|最大值|最小值|是否固定位数|前缀|后缀|是否唯一|是否是纯数字|几位小数
+            //随机值  //类型|长度|最大值|最小值|是否固定位数|前缀|后缀|是否唯一|字符策略(0:任意 1:纯数字 2:纯字母 3:纯汉字 4:数字+字母 5:数字+汉字 6:字母+汉字)|几位小数
             String prefix = valueSchema[5];
             String suffix = valueSchema[6];
             boolean isUnique = Boolean.parseBoolean(valueSchema[7]);
@@ -309,32 +412,32 @@ public class InsertServiceImpl implements InsertService {
             int len = Integer.parseInt(valueSchema[1]);
 
             boolean isFixedLength = Boolean.parseBoolean(valueSchema[4]);
-            boolean isNum = Boolean.parseBoolean(valueSchema[8]);
+            int characterStrategy = Integer.parseInt(valueSchema[8]);
             String randomKey;
             do {
-                if(FieldType.DOUBLE.equals(fieldType) || FieldType.DECIMAL.equals(fieldType)){
+                if (FieldType.DOUBLE.equals(fieldType) || FieldType.DECIMAL.equals(fieldType)) {
                     //小数
-                    if(valueSchema[3].equals(ConStant.ANY2)){
+                    if (valueSchema[3].equals(ConStant.ANY2)) {
                         valueSchema[3] = "0";
                     }
-                    if(valueSchema[2].equals(ConStant.ANY2)){
+                    if (valueSchema[2].equals(ConStant.ANY2)) {
                         valueSchema[2] = "100";
                     }
                     BigDecimal min = new BigDecimal(valueSchema[3]);
                     BigDecimal max = new BigDecimal(valueSchema[2]);
 
-                    BigDecimal bigDecimal = new BigDecimal(random.nextDouble()).multiply(max.subtract(min)).add(min).setScale(Integer.parseInt(valueSchema[9]),BigDecimal.ROUND_DOWN);
+                    BigDecimal bigDecimal = new BigDecimal(random.nextDouble()).multiply(max.subtract(min)).add(min).setScale(Integer.parseInt(valueSchema[9]), BigDecimal.ROUND_DOWN);
                     randomKey = bigDecimal.toString();
-                }else{
+                } else {
                     if (isFixedLength) {
-                        //固定位数 不能是数字类型
-                        randomKey = RandomUtil.createRandomKey(random, valueSchema[3], valueSchema[2], len, isNum);
+                        //固定位数
+                        randomKey = RandomUtil.createRandomKey(random, valueSchema[3], valueSchema[2], len, characterStrategy);
                     } else {
                         //不固定位数
                         if (len != -1) {
-                            randomKey = RandomUtil.createRandomKey(random, valueSchema[3], valueSchema[2], random.nextInt(len) + 1, isNum);
+                            randomKey = RandomUtil.createRandomKey(random, valueSchema[3], valueSchema[2], random.nextInt(len) + 1, characterStrategy);
                         } else {
-                            randomKey = RandomUtil.createRandomKey(random, valueSchema[3], valueSchema[2], isNum);
+                            randomKey = RandomUtil.createRandomKey(random, valueSchema[3], valueSchema[2], characterStrategy);
                         }
                     }
                 }
@@ -368,7 +471,6 @@ public class InsertServiceImpl implements InsertService {
             sb.append(fieldType.convert(prefix + str + suffix));
         }
     }
-
 
 
 

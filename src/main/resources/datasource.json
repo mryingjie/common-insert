@@ -1,0 +1,16 @@
+[
+  {
+
+    "database": "tests",
+    "host": "localhost",
+    "password": "zheng",
+    "port": 3306,
+    "type": "mysql",
+    "userName": "root"
+  },
+  {
+    "database": "t_base",
+    "filePath": "/Users/lsjr3/Documents/docs/dev/t_base.xlsx",
+    "type": "excel"
+  }
+]

@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <script src="../layui/layui.js"></script>
+    <link rel="stylesheet" href="../layui/css/layui.css">
+    <link rel="stylesheet" href="../css/style.css">
+
+    <title>Title</title>
+    <style>
+
+    </style>
+</head>
+<body class="layui-layout-body">
+<div class="container">
+    <div class="content">
+        <h1 class="local_area">数据源配置</h1>
+        <form class="layui-form" action="">
+            <div class="search border main-search">
+                <h2 class="local_area" style="font-size: 20px;font-weight: lighter">数据源列表</h2>
+                <hr style="color:#2b82de;background-color: #2b82de ;height: 2px;border: none">
+                <hr style="color:rgba(43,130,222,0);background-color: rgba(43,130,222,0) ;height: 2px;border: none">
+                <hr style="color:#2b82de;background-color: rgba(43,130,222,0) ;height: 2px;border: none">
+
+                <div class="layui-form-item">
+                    <label class="layui-form-label" style="font-size: 20px">选择</label>
+                    <div class="layui-input-block" onclick="queryDatasource()" id="checkBox">
+                        <input type="checkbox" id="databaseItem" title="数据库" checked="true">
+                        <input type="checkbox" id="fileItem" title="文件" checked="true">
+                    </div>
+
+                </div>
+
+                <div class="clear"></div>
+
+                <hr style="color:#2b82de;background-color: rgba(43,130,222,0) ;height: 2px;border: none">
+                <!--table-->
+                <div class="tablebox mar20">
+                    <!--main-list-->
+                    <table cellpadding="0" cellspacing="0" class="table">
+                        <thead>
+                        <tr>
+                            <th>序号</th>
+                            <th>库名</th>
+                            <th>类型</th>
+                            <th>地址</th>
+                            <th>端口</th>
+                            <th>用户名</th>
+                            <th>密码</th>
+                            <th>文件地址</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody id="tbody">
+
+                        </tbody>
+                    </table>
+                </div>
+                <hr style="color:#2b82de;background-color: rgba(43,130,222,0) ;height: 2px;border: none">
+
+                <div class="clear"></div>
+                <div class="layui-form-item">
+                    <div class="layui-input-block" style="float:right" onclick="addDatasource()">
+                        <button type="button" class="layui-btn layui-btn-radius layui-btn-normal">新增</button>
+                    </div>
+                </div>
+            </div>
+
+        </form>
+
+<!--        新增数据源 POP-->
+        <div class="pop" id="add_pop" style="display:none; width: 150px;">
+            <div class="pop_bg"></div><!--遮罩-->
+            <div class="pop_box info-jk" style="width: 80%;background:white">
+                <h1 class="local_area">修改数据源</h1>
+                <div class="c-lose add_close" style="float: right"><a style="font-size: 16px" href="javascript:void(0);" onclick="closeAddPop()"><span style="color: black; size: 20px">X</span></a></div>
+                <hr style="color:#2b82de;background-color: #2b82de ;height: 2px;border: none">
+                <div class="s_one inputs_item"   type="input">
+                    <label style="width: 120px">数据库<span style="color: red; ">*</span></label>
+                    <input type="text" class="database"  id="add_database" name="database"  />
+                </div>
+                <div class="s_one inputs_item"    type="input">
+                    <label style="width: 120px">类型<span style="color: red; ">*</span></label>
+                    <select class="type" id="add_type" name="type" style="width: 280px">
+                        <option value ="">请选择</option>
+                        <option value ="mysql">mysql</option>
+                        <option value ="excel">excel</option>
+                        <option value ="es">es</option>
+                        <option value ="mongo">mongo</option>
+                    </select>
+                </div>
+                <div class="clear"></div>
+                <div class="s_one inputs_item"    type="input">
+                    <label style="width: 120px">host地址</label>
+                    <input type="text" class="host"  id="add_host" name="host"  maxlength ="40"/>
+                </div>
+                <div class="s_one inputs_item" type="input">
+                    <label style="width: 120px">端口</label>
+                    <input type="text" class="port"  id="add_port" name="port"  />
+                </div>
+                <div class="clear"></div>
+                <div class="s_one inputs_item" type="input">
+                    <label style="width: 120px">用户名</label>
+                    <input type="text" class="userName"  id="add_userName" name="userName"/>
+                </div>
+                <div class="s_one inputs_item" type="input">
+                    <label style="width: 120px">密码</label>
+                    <input type="text" class="password"  id="add_password" name="password"  maxlength ="20"/>
+                </div>
+                <div class="clear"></div>
+                <div class="s_one inputs_item" type="input">
+                    <label style="width: 120px">文件路径</label>
+                    <input type="text" class="filePath"  id="add_filePath" name="filePath"  maxlength ="30"/>
+                </div>
+                <div class="clear"></div>
+                <div class="pagelistwrapper"></div>
+                <div class="s_btn " id = "add_cancel" onclick="closeAddPop()" style="float: right">取消</div>
+                <div class="s_btn bg_red left mr30 submit_btn" onclick="addSubmit()" id="add_submit" style="float: right">确认</div>
+            </div>
+        </div>
+
+<!--        修改数据源 POP-->
+        <div class="pop" id="update_pop" style="display:none; width: 150px;">
+            <div class="pop_bg"></div><!--遮罩-->
+                <div class="pop_box info-jk" style="width: 80%;background:white">
+                <h1 class="local_area">修改数据源</h1>
+                <div class="c-lose add_close" style="float: right"><a style="font-size: 16px" href="javascript:void(0);" onclick="closeUpdatePop()"><span style="color: black; size: 20px">X</span></a></div>
+                <hr style="color:#2b82de;background-color: #2b82de ;height: 2px;border: none">
+                <div class="s_one inputs_item"   type="input">
+                    <label style="width: 120px">数据库<span style="color: red; ">*</span></label>
+                    <input type="text" class="database"  id="update_database" name="database"  />
+                </div>
+                <div class="s_one inputs_item"    type="input">
+                    <label style="width: 120px">类型<span style="color: red; ">*</span></label>
+                    <select class="type" id="update_type" name="type" style="width: 280px">
+                        <option value ="">请选择</option>
+                        <option value ="mysql">mysql</option>
+                        <option value ="excel">excel</option>
+                        <option value ="es">es</option>
+                        <option value ="mongo">mongo</option>
+                    </select>
+                </div>
+                <div class="clear"></div>
+                <div class="s_one inputs_item"    type="input">
+                    <label style="width: 120px">host地址</label>
+                    <input type="text" class="host"  id="update_host" name="host"  maxlength ="40"/>
+                </div>
+                <div class="s_one inputs_item" type="input">
+                    <label style="width: 120px">端口</label>
+                    <input type="text" class="port"  id="update_port" name="port"  />
+                </div>
+                <div class="clear"></div>
+                <div class="s_one inputs_item" type="input">
+                    <label style="width: 120px">用户名</label>
+                    <input type="text" class="userName"  id="update_userName" name="userName"/>
+                </div>
+                <div class="s_one inputs_item" type="input">
+                    <label style="width: 120px">密码</label>
+                    <input type="text" class="password"  id="update_password" name="password"  maxlength ="20"/>
+                </div>
+                <div class="clear"></div>
+                <div class="s_one inputs_item" type="input">
+                    <label style="width: 120px">文件路径</label>
+                    <input type="text" class="filePath"  id="update_filePath" name="filePath"  maxlength ="30"/>
+                </div>
+                <div class="clear"></div>
+                <div class="pagelistwrapper"></div>
+                <div class="s_btn " id = "update_cancel" onclick="closeUpdatePop()" style="float: right">取消</div>
+                <div class="s_btn bg_red left mr30 submit_btn" onclick="update_submit()" id="update_submit" style="float: right">确认</div>
+            </div>
+        </div>
+        <!-- POP -->
+        <div class="pop" id="pop-info-load" style="display:none;">
+            <div class="pop_bg"></div><!--遮罩-->
+            <div class="pop_box info-list" id="box-info-load">
+            </div>
+        </div>
+
+        <!-- content end -->
+    </div>
+    <!-- container end -->
+</div>
+</body>
+<script type="text/javascript">
+    var form, layer, $;
+    layui.use(['form', 'layer', 'jquery'], function () {
+        form = layui.form;
+        layer = layui.layer;
+        $ = layui.$;
+        $(function () {
+            queryDatasource();
+        });
+    });
+
+
+    //查询数据源列表
+    function queryDatasource() {
+        // layer.load(2, {shade: [0.2, '#DDDDDD']});
+        var datasourceStatus = document.getElementById("databaseItem").checked;
+        console.log(datasourceStatus);
+        var fileStatus = document.getElementById("fileItem").checked;
+        console.log(fileStatus);
+        var status = 0;
+        if (datasourceStatus && fileStatus) {
+            //全查
+            status = 3;
+        } else if (datasourceStatus) {
+            //只有数据库
+            status = 1;
+        } else if (fileStatus) {
+            //只有文件
+            status = 2;
+        } else {
+            //都不查
+            status = 0;
+        }
+        $.ajax({
+            url: "/datasource/" + status,
+            type: "GET",
+            success: function (ajaxResult) {
+                layer.closeAll();
+                if (ajaxResult.success) {
+                    var data = ajaxResult.data;
+
+                    var tbody = $("#tbody");
+                    tbody.empty();
+                    if (data.length === 0) {
+                        tbody.html("<tr><td style='color:green;text-align: left' colspan='20'>Nothing to show！</td></tr>");
+                    } else {
+                        var tbodyStr = "";
+                        for (var i = 0; i < data.length; i++) {
+                            var info = data[i];
+                            tbodyStr += '<tr>\n' +
+                                '<td>' + (i + 1) + '</td>\n' +
+                                '<td class="database">' + info.database + '</td>\n' +
+                                '<td class="type">' + info.type + '</td>\n' +
+                                '<td class="host">' + info.host + '</td>\n' +
+                                '<td class="port">' + info.port + '</td>\n' +
+                                '<td class="userName">' + info.userName + '</td>\n' +
+                                '<td class="password">' + info.password + '</td>\n' +
+                                '<td class="filePath">' + info.filePath + '</td>\n' +
+                                '<td class="option">' +
+                                '<a class="a" href="javascript:void(0);" onclick="deleteDatasource($(this))" database="' + info.database + '" >删除 </a>' +
+                                '<a class="a" href="javascript:void(0);" onclick="updateDatasource($(this))" > 更新 </a>';
+                            if (!info.persistenced) {
+                                tbodyStr += '<a class="a" href="javascript:void(0);" onclick="persistence($(this))" database="' + info.database + '" > 持久化</a>';
+                            }
+
+                            tbodyStr += '</td>\n';
+                            tbodyStr += '</tr>';
+                        }
+                        tbody.html(tbodyStr);
+                    }
+                } else {
+                    layer.msg(ajaxResult.data, {icon: 2, time: 2500});
+                }
+            }
+        });
+
+    }
+
+    function deleteDatasource(obj) {
+        layer.open({
+            content: '确定要删除' + obj.attr('database') + '吗？'
+            , btn: ['确定', '取消']
+            , yes: function (index, layero) {
+                $.ajax({
+                    url: "/datasource/" + obj.attr('database'),
+                    type: "DELETE",
+                    contentType: 'application/json;charset=UTF-8',
+                    dataType: 'json',
+                    success: function (ajaxResult) {
+                        if (!ajaxResult.success) {
+                            layer.msg(ajaxResult.data, {icon: 2, time: 2500});
+                        }
+                        queryDatasource();
+                    }
+                });
+            }
+            , btn2: function (index, layero) {
+
+            }
+            , cancel: function () {
+            }
+        });
+
+    }
+
+    function addDatasource() {
+        $('#add_pop').css("display",'block');
+    }
+
+    function updateDatasource(obj) {
+        obj.parent().prevAll().each(function (i, domObj) {
+            var classAttr = $(domObj).attr("class");
+            var value = $(domObj).html();
+            if (classAttr) {
+                if (value !== "--") {
+                    $("#update_" + classAttr).val(value);
+                }else{
+                    $("#update_" + classAttr).val("");
+                }
+            }
+        });
+        $('#update_pop').css("display",'block');
+    }
+
+    function addSubmit() {
+        var database = $("#add_database").val().trim();
+        var type = $("#add_type").val().trim();
+        var host = $("#add_host").val().trim();
+        var port = $("#add_port").val().trim();
+        var filePath = $("#add_filePath").val().trim();
+        var userName = $("#add_userName").val().trim();
+        var password = $("#add_password").val().trim();
+        var param = {};
+        var reg = /^\d+$/;
+        if(database){
+            param.database = database;
+        }else{
+            layer.msg("数据库不能为空", {icon: 2, time: 2500});
+            return;
+        }
+        if(type){
+            param.type = type;
+        }else{
+            layer.msg("数据源类型不能为空", {icon: 2, time: 2500});
+            return;
+        }
+        if(host){
+            param.host = host;
+        }
+        if(port){
+            console.log();
+            if(!port.match(reg)){
+                layer.msg("端口号只能为数字", {icon: 2, time: 2500});
+                return;
+            }
+            param.port = port;
+        }
+        if(filePath){
+            param.filePath = filePath;
+        }
+        if(userName){
+            param.userName = userName;
+        }
+        if(password){
+            param.password = password;
+        }
+
+        $.ajax({
+            type : 'POST',
+            data : JSON.stringify(param),
+            url : '/datasource',
+            contentType : 'application/json;charset=UTF-8',
+            dataType : 'json',
+            success : function(ajaxResult){
+                if(ajaxResult.success){
+                    layer.msg('添加成功！', {icon: 1,time:2500});
+                    closeAddPop();
+                    queryDatasource();
+                }else {
+                    layer.msg("添加失败,"+ajaxResult.data, {icon: 2, time: 2500});
+                }
+            }
+        });
+
+    }
+
+    function update_submit() {
+        var database = $("#update_database").val().trim();
+        var type = $("#update_type").val().trim();
+        var host = $("#update_host").val().trim();
+        var port = $("#update_port").val().trim();
+        var filePath = $("#update_filePath").val().trim();
+        var userName = $("#update_userName").val().trim();
+        var password = $("#update_password").val().trim();
+        var param = {};
+        var reg = /^\d+$/;
+        if(database){
+            param.database = database;
+        }else{
+            layer.msg("数据库不能为空", {icon: 2, time: 2500});
+            return;
+        }
+        if(type){
+            param.type = type;
+        }else{
+            layer.msg("数据源类型不能为空", {icon: 2, time: 2500});
+            return;
+        }
+        if(host){
+            param.host = host;
+        }
+        if(port){
+            console.log();
+            if(!port.match(reg)){
+                layer.msg("端口号只能为数字", {icon: 2, time: 2500});
+                return;
+            }
+            param.port = port;
+        }
+        if(filePath){
+            param.filePath = filePath;
+        }
+        if(userName){
+            param.userName = userName;
+        }
+        if(password){
+            param.password = password;
+        }
+
+        $.ajax({
+            type : 'PUT',
+            data : JSON.stringify(param),
+            url : '/datasource',
+            contentType : 'application/json;charset=UTF-8',
+            dataType : 'json',
+            success : function(ajaxResult){
+                if(ajaxResult.success){
+                    layer.msg('修改成功！', {icon: 1,time:2500});
+                    closeUpdatePop();
+                    queryDatasource();
+                }else {
+                    layer.msg("修改失败,"+ajaxResult.data, {icon: 2, time: 2500});
+                }
+            }
+        });
+
+    }
+
+    function persistence(obj) {
+        $.ajax({
+            url: "/datasource/" + obj.attr('database'),
+            type: "PUT",
+            contentType: 'application/json;charset=UTF-8',
+            dataType: 'json',
+            success: function (ajaxResult) {
+                if (!ajaxResult.success) {
+                    layer.msg(ajaxResult.data, {icon: 2, time: 2500});
+                }else {
+                    layer.msg("持久化成功", {icon: 1,time:2500})
+                    queryDatasource();
+                }
+
+            }
+        });
+    }
+
+    function closeUpdatePop() {
+        $('#update_pop').css("display",'none');
+    }
+    function closeAddPop() {
+        $('#add_pop').css("display",'none');
+    }
+
+</script>
+</html>
