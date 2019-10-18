@@ -25,7 +25,8 @@
 ## 快速开始  
 整个jar包是个springboot的web项目，启动后会在本地运行一个tomcat实例,端口默认为9090，启动后浏览器中访问http://localhost:9090/index     
 1、确保本地有java8的运行时环境，然后可以直接将项目clone到本地，idea中启动。  
-2、你可以下载编译好的zip包(https://github.com/mryingjie/common-insert/releases)到本地，unzip解压 ，无论是window还是linux或mac os 都可以使用java -jar命令启动。注意解压后会有一个jar包和data文件夹，data文件夹保存的是数据，不能删除！如果是刚下载的zip包数据为空。后续的数据持久化都会保存到data文件夹下的文件中。
+2、你可以下载编译好的zip包[common-insert-0.0.1-SNAPSHOT.zip
+](https://github.com/mryingjie/common-insert/releases/download/0.0.1-SNAPSHOT/common-insert-0.0.1-SNAPSHOT.zip)到本地，unzip解压 ，无论是window还是linux或mac os 都可以使用java -jar命令启动。注意解压后会有一个jar包和data文件夹，data文件夹保存的是数据，不能删除！如果是刚下载的zip包数据为空。后续的数据持久化都会保存到data文件夹下的文件中。
 
 ## 第一种访问方式 使用浏览器访问web页面 链接：http://localhost:9090/index
 ### 第一步 配置数据源
