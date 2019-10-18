@@ -103,8 +103,15 @@ public class InsertServiceImpl implements InsertService, InitializingBean {
 
         //拼接sql
         String sql = spliceSql(insertParam);
+        int i = 0;
         //插入数据
-        return sqlExecutor.executeInsert(sql);
+        try {
+             i = sqlExecutor.executeInsert(sql);
+        }catch (Throwable e){
+            throw new BizException("数据插入失败，请检查数据源连接配置是否正确，或检查运行日志中的生成的sql是否有误");
+        }
+
+        return i;
     }
 
     @Override

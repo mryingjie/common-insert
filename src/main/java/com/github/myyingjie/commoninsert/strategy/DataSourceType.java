@@ -24,60 +24,80 @@ public enum DataSourceType {
     MYSQL("mysql") {
         @Override
         public DataSource createDataSource(DataSourceProperties insertParam) throws Exception {
-            RDBMSDataSourceProperties dataSourceProperties = new RDBMSDataSourceProperties();
-            String host = insertParam.getHost();
-            int port = insertParam.getPort() == 0 ? 3306 : insertParam.getPort();
-            String database = insertParam.getDatabase();
-            dataSourceProperties.setUrl("jdbc:mysql://" + host + ":" + port + "/" + database + "?useUnicode=true&characterEncoding=utf8&autoReconnect=true&failOverReadOnly=false&autoReconnect=true&failOverReadOnly=false&serverTimezone=GMT%2B8");
-            dataSourceProperties.setUsername(insertParam.getUserName());
-            dataSourceProperties.setPassword(insertParam.getPassword());
-            dataSourceProperties.setDriverClass("com.mysql.cj.jdbc.Driver");
-            dataSourceProperties.setInitialSize(5);
-            dataSourceProperties.setTestOnReturn(false);
-            dataSourceProperties.setMinEvictableIdleTimeMillis(50000L);
-            return new StandardSqlDataSource(dataSourceProperties);
+            try{
+                RDBMSDataSourceProperties dataSourceProperties = new RDBMSDataSourceProperties();
+                String host = insertParam.getHost();
+                int port = insertParam.getPort() == 0 ? 3306 : insertParam.getPort();
+                String database = insertParam.getDatabase();
+                dataSourceProperties.setUrl("jdbc:mysql://" + host + ":" + port + "/" + database + "?useUnicode=true&characterEncoding=utf8&autoReconnect=true&failOverReadOnly=false&autoReconnect=true&failOverReadOnly=false&serverTimezone=GMT%2B8");
+                dataSourceProperties.setUsername(insertParam.getUserName());
+                dataSourceProperties.setPassword(insertParam.getPassword());
+                dataSourceProperties.setDriverClass("com.mysql.cj.jdbc.Driver");
+                dataSourceProperties.setInitialSize(5);
+                dataSourceProperties.setTestOnReturn(false);
+                dataSourceProperties.setMinEvictableIdleTimeMillis(50000L);
+                return new StandardSqlDataSource(dataSourceProperties);
+            }catch (Throwable e){
+                throw new BizException("数据源创建失败！");
+            }
+
         }
     },
 
     ES("es") {
         @Override
         public DataSource createDataSource(DataSourceProperties param) {
-            int port = param.getPort() == 0 ? 9200 : param.getPort();
-            String[] split = param.getHost().split(",");
-            List<HttpHost> hosts = Stream.of(split)
-                    .map(host -> new HttpHost(host, port, "http"))
-                    .collect(Collectors.toList());
+            try{
+                int port = param.getPort() == 0 ? 9200 : param.getPort();
+                String[] split = param.getHost().split(",");
+                List<HttpHost> hosts = Stream.of(split)
+                        .map(host -> new HttpHost(host, port, "http"))
+                        .collect(Collectors.toList());
 
-            return new ElasticsearchDataSource(hosts);
+                return new ElasticsearchDataSource(hosts);
+            }catch (Throwable e){
+                throw new BizException("数据源创建失败！");
+            }
+
         }
     },
 
     MONGO("mongo") {
         @Override
         public DataSource createDataSource(DataSourceProperties param) {
-            int port = param.getPort() == 0 ? 27017 : param.getPort();
-            String[] split = param.getHost().split(",");
-            List<ServerAddress> hosts = Stream.of(split)
-                    .map(host -> new ServerAddress(host, port))
-                    .collect(Collectors.toList());
+            try {
+                int port = param.getPort() == 0 ? 27017 : param.getPort();
+                String[] split = param.getHost().split(",");
+                List<ServerAddress> hosts = Stream.of(split)
+                        .map(host -> new ServerAddress(host, port))
+                        .collect(Collectors.toList());
 
-            if(param.getUserName()!=null){
-                MongoDataSourceProperties mongoDataSourceProperties = new MongoDataSourceProperties();
-                mongoDataSourceProperties.setUser(param.getUserName());
-                mongoDataSourceProperties.setPassword(param.getPassword().toCharArray());
-                mongoDataSourceProperties.setDbName(param.getDatabase());
-                mongoDataSourceProperties.setServerAddress(hosts);
-                return new MongoDataSource(mongoDataSourceProperties);
+                if(param.getUserName()!=null){
+                    MongoDataSourceProperties mongoDataSourceProperties = new MongoDataSourceProperties();
+                    mongoDataSourceProperties.setUser(param.getUserName());
+                    mongoDataSourceProperties.setPassword(param.getPassword().toCharArray());
+                    mongoDataSourceProperties.setDbName(param.getDatabase());
+                    mongoDataSourceProperties.setServerAddress(hosts);
+                    return new MongoDataSource(mongoDataSourceProperties);
+                }
+
+                return new MongoDataSource(hosts, param.getDatabase());
+            }catch (Throwable e){
+                throw new BizException("数据源创建失败！");
             }
 
-            return new MongoDataSource(hosts, param.getDatabase());
         }
     },
 
     EXCEL("excel") {
         @Override
         public DataSource createDataSource(DataSourceProperties param) {
-            return new ExcelDataSource(param.getFilePath(), null);
+            try {
+                return new ExcelDataSource(param.getFilePath(), null);
+
+            }catch (Throwable e){
+                throw new BizException("数据源创建失败！");
+            }
         }
     };
 

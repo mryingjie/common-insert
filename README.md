@@ -18,11 +18,14 @@
 
 关系型数据库
 - [x] mysql  
+## 简单介绍
+核心思想是将所有数据生成规则转化为sql语句然后执行insert语句。如果是mysql数据源则直接由mysql执行，如果是别的数据源则使用sql-executor解析sql并调用对应数据源的api执行。
+详情请转移到以下链接：[sql-executor](https://github.com/mryingjie/sql-executor)
 
 ## 快速开始  
 整个jar包是个springboot的web项目，启动后会在本地运行一个tomcat实例,端口默认为9090，启动后浏览器中访问http://localhost:9090/index     
 1、确保本地有java8的运行时环境，然后可以直接将项目clone到本地，idea中启动。  
-2、你可以下载编译好的zip包到本地，unzip解压 ，无论是window还是linux或mac os 都可以使用java -jar命令启动。注意解压后会有一个jar包和data文件夹，data文件夹保存的是数据，不能删除！如果是刚下载的zip包数据为空。后续的数据持久化都会保存到data文件夹下的文件中。
+2、你可以下载编译好的zip包(https://github.com/mryingjie/common-insert/releases)到本地，unzip解压 ，无论是window还是linux或mac os 都可以使用java -jar命令启动。注意解压后会有一个jar包和data文件夹，data文件夹保存的是数据，不能删除！如果是刚下载的zip包数据为空。后续的数据持久化都会保存到data文件夹下的文件中。
 
 ## 第一种访问方式 使用浏览器访问web页面 链接：http://localhost:9090/index
 ### 第一步 配置数据源
