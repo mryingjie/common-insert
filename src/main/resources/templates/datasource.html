@@ -195,7 +195,7 @@
 
     //查询数据源列表
     function queryDatasource() {
-        // layer.load(2, {shade: [0.2, '#DDDDDD']});
+        var index = layer.load(2, {shade: [0.2, '#DDDDDD']});
         var datasourceStatus = document.getElementById("databaseItem").checked;
         console.log(datasourceStatus);
         var fileStatus = document.getElementById("fileItem").checked;
@@ -218,14 +218,13 @@
             url: "/datasource/" + status,
             type: "GET",
             success: function (ajaxResult) {
-                layer.closeAll();
                 if (ajaxResult.success) {
                     var data = ajaxResult.data;
 
                     var tbody = $("#tbody");
                     tbody.empty();
                     if (data.length === 0) {
-                        tbody.html("<tr><td style='color:green;text-align: left' colspan='20'>Nothing to show！</td></tr>");
+                        tbody.html("<tr><td style='color:green;text-align: center' colspan='20'>Nothing to show！</td></tr>");
                     } else {
                         var tbodyStr = "";
                         for (var i = 0; i < data.length; i++) {
@@ -254,30 +253,36 @@
                 } else {
                     layer.msg(ajaxResult.data, {icon: 2, time: 2500});
                 }
+                layer.close(index);
             }
         });
 
     }
 
     function deleteDatasource(obj) {
-        layer.load(2, {shade: [0.2, '#DDDDDD']});
-        layer.open({
+
+        var open = layer.open({
             content: '确定要删除' + obj.attr('database') + '吗？'
             , btn: ['确定', '取消']
             , yes: function (index, layero) {
+                var load = layer.load(2, {shade: [0.2, '#DDDDDD']});
                 $.ajax({
                     url: "/datasource/" + obj.attr('database'),
                     type: "DELETE",
                     contentType: 'application/json;charset=UTF-8',
                     dataType: 'json',
                     success: function (ajaxResult) {
-                        layer.closeAll();
+                        layer.close(load);
                         if (!ajaxResult.success) {
                             layer.msg(ajaxResult.data, {icon: 2, time: 2500});
+                        }else{
+                            layer.msg('删除成功！', { icon: 1,time:1500});
                         }
+
                         queryDatasource();
                     }
                 });
+                layer.close(open);
             }
             , btn2: function (index, layero) {
 
@@ -359,7 +364,7 @@
             success : function(ajaxResult){
                 layer.closeAll();
                 if(ajaxResult.success){
-                    layer.msg('添加成功！', {icon: 1,time:2500});
+                    layer.msg('添加成功！', { icon: 1,time:1500});
                     closeAddPop();
                     queryDatasource();
                 }else {
@@ -420,9 +425,9 @@
             contentType : 'application/json;charset=UTF-8',
             dataType : 'json',
             success : function(ajaxResult){
-                layer.closeAll();
+                layer.close(layer.index);
                 if(ajaxResult.success){
-                    layer.msg('修改成功！', {icon: 1,time:2500});
+                    layer.msg('修改成功！', { icon: 1,time:1500});
                     closeUpdatePop();
                     queryDatasource();
                 }else {
@@ -434,18 +439,16 @@
     }
 
     function persistence(obj) {
-        layer.load(2, {shade: [0.2, '#DDDDDD']});
         $.ajax({
             url: "/datasource/" + obj.attr('database'),
             type: "PUT",
             contentType: 'application/json;charset=UTF-8',
             dataType: 'json',
             success: function (ajaxResult) {
-                layer.load(2, {shade: [0.2, '#DDDDDD']});
                 if (!ajaxResult.success) {
                     layer.msg(ajaxResult.data, {icon: 2, time: 2500});
                 }else {
-                    layer.msg("持久化成功", {icon: 1,time:2500})
+                    layer.msg("持久化成功", { icon: 1,time:1500})
                     queryDatasource();
                 }
 

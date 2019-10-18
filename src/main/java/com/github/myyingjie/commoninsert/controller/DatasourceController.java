@@ -1,11 +1,12 @@
 package com.github.myyingjie.commoninsert.controller;
 import java.util.List;
+import java.util.Set;
 
 import com.alibaba.fastjson.JSON;
 import com.github.myyingjie.commoninsert.bean.AjaxResult;
 import com.github.myyingjie.commoninsert.bean.DataSourceProperties;
 import com.github.myyingjie.commoninsert.bean.DataSourcePropertiesVo;
-import com.github.myyingjie.commoninsert.bean.InsertParam;
+import com.github.myyingjie.commoninsert.exception.BizException;
 import com.github.myyingjie.commoninsert.service.DatsourceService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 public class DatasourceController extends AjaxBaseController{
 
     @Autowired
-    private DatsourceService insertService;
+    private DatsourceService datsourceService;
 
 
 
@@ -35,12 +36,16 @@ public class DatasourceController extends AjaxBaseController{
         start();
         log.info("query datasource,status:{}", status);
         try {
-            List<DataSourcePropertiesVo> dataSources = insertService.queryDatasource(status);
+            List<DataSourcePropertiesVo> dataSources = datsourceService.queryDatasource(status);
             success();
             set(dataSources);
-        }catch (Exception e){
+        }catch (BizException e){
             log.error(e.getMessage(),e);
             set(e.getMessage());
+            fail();
+        }catch (Throwable e){
+            log.error("系统错误",e);
+            set("系统错误");
             fail();
         }
         return end();
@@ -55,11 +60,15 @@ public class DatasourceController extends AjaxBaseController{
         start();
         log.info("update datasource,dataSourceProperties:{}", JSON.toJSONString(dataSourceProperties));
         try {
-            insertService.updateDatasource(dataSourceProperties);
+            datsourceService.updateDatasource(dataSourceProperties);
             success();
-        }catch (Exception e){
+        }catch (BizException e){
             log.error(e.getMessage(),e);
             set(e.getMessage());
+            fail();
+        }catch (Throwable e){
+            log.error("系统错误",e);
+            set("系统错误");
             fail();
         }
         return end();
@@ -74,11 +83,15 @@ public class DatasourceController extends AjaxBaseController{
         start();
         log.info("delete datasource,database:{}", database);
         try {
-            insertService.deleteDatasource(database);
+            datsourceService.deleteDatasource(database);
             success();
-        }catch (Exception e){
+        }catch (BizException e){
             log.error(e.getMessage(),e);
             set(e.getMessage());
+            fail();
+        }catch (Throwable e){
+            log.error("系统错误",e);
+            set("系统错误");
             fail();
         }
         return end();
@@ -95,11 +108,15 @@ public class DatasourceController extends AjaxBaseController{
         log.info("add datasource : {}", JSON.toJSONString(dataSourceProperties));
         try {
 
-            insertService.addDatasource(dataSourceProperties);
+            datsourceService.addDatasource(dataSourceProperties);
             success();
-        }catch (Exception e){
+        }catch (BizException e){
             log.error(e.getMessage(),e);
             set(e.getMessage());
+            fail();
+        }catch (Throwable e){
+            log.error("系统错误",e);
+            set("系统错误");
             fail();
         }
         return end();
@@ -114,11 +131,36 @@ public class DatasourceController extends AjaxBaseController{
         start();
         log.info("持久化数据源 database:{}", database);
         try {
-            insertService.persistence(database);
+            datsourceService.persistence(database);
             success();
-        }catch (Exception e){
+        }catch (BizException e){
             log.error(e.getMessage(), e);
             set(e.getMessage());
+            fail();
+        }catch (Throwable e){
+            log.error("系统错误",e);
+            set("系统错误");
+            fail();
+        }
+        return end();
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "database/list",method = RequestMethod.GET)
+    public AjaxResult databaseList(){
+        start();
+        log.info("query databaseList");
+        try {
+            Set<String> databaseList = datsourceService.queryDatabase();
+            success();
+            set(databaseList);
+        }catch (BizException e){
+            log.error(e.getMessage(), e);
+            set(e.getMessage());
+            fail();
+        }catch (Throwable e){
+            log.error("系统错误",e);
+            set("系统错误");
             fail();
         }
         return end();

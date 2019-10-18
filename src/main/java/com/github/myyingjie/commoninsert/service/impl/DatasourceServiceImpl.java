@@ -2,6 +2,7 @@ package com.github.myyingjie.commoninsert.service.impl;
 
 import com.github.myyingjie.commoninsert.bean.*;
 import com.github.myyingjie.commoninsert.config.SQLExecutorConfig;
+import com.github.myyingjie.commoninsert.exception.BizException;
 import com.github.myyingjie.commoninsert.service.DatsourceService;
 import com.github.myyingjie.commoninsert.strategy.DataSourceType;
 import com.github.myyingjie.commoninsert.util.ReflectUtil;
@@ -55,7 +56,7 @@ public class DatasourceServiceImpl implements DatsourceService {
     }
 
     @Override
-    public void deleteDatasource(String database) throws IOException {
+    public synchronized void deleteDatasource(String database) throws IOException {
         sqlExecutorConfig.dataSourcePropertiesMap.remove(database);
         DataSource remove = sqlExecutorConfig.dataSourceMap.get(database);
         List<String> tableName = new ArrayList<>();
@@ -73,7 +74,7 @@ public class DatasourceServiceImpl implements DatsourceService {
     }
 
     @Override
-    public void updateDatasource(DataSourceProperties dataSourceProperties) throws Exception {
+    public synchronized void updateDatasource(DataSourceProperties dataSourceProperties) throws Exception {
         String database = dataSourceProperties.getDatabase();
         DataSourceProperties original = sqlExecutorConfig.dataSourcePropertiesMap.get(database);
         DataSource remove;
@@ -102,9 +103,9 @@ public class DatasourceServiceImpl implements DatsourceService {
 
 
     @Override
-    public void addDatasource(DataSourceProperties dataSourceProperties) throws Exception {
+    public synchronized void addDatasource(DataSourceProperties dataSourceProperties) throws Exception {
         if (sqlExecutorConfig.dataSourcePropertiesMap.containsKey(dataSourceProperties.getDatabase())) {
-            throw new RuntimeException(dataSourceProperties.getDatabase() + " is already exists ，please delete it first!!");
+            throw new BizException(dataSourceProperties.getDatabase() + " is already exists ，please delete it first!!");
         }
         DataSource dataSource = DataSourceType.getByType(dataSourceProperties.getType()).createDataSource(dataSourceProperties);
         sqlExecutorConfig.dataSourcePropertiesMap.put(dataSourceProperties.getDatabase(), dataSourceProperties);
@@ -112,8 +113,13 @@ public class DatasourceServiceImpl implements DatsourceService {
     }
 
     @Override
-    public void persistence(String database) throws IOException {
+    public synchronized void persistence(String database) throws IOException {
         sqlExecutorConfig.persistence(database);
+    }
+
+    @Override
+    public Set<String> queryDatabase() {
+        return sqlExecutorConfig.databaseList();
     }
 
     public void persistenceDelete(String database) throws IOException {

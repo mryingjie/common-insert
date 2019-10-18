@@ -1,41 +1,63 @@
 package com.github.myyingjie.commoninsert.service.impl;
 
+import com.alibaba.druid.sql.SQLUtils;
+import com.alibaba.druid.sql.ast.SQLDataType;
+import com.alibaba.druid.sql.ast.SQLStatement;
+import com.alibaba.druid.sql.ast.expr.SQLIdentifierExpr;
+import com.alibaba.druid.sql.ast.statement.*;
 import com.alibaba.fastjson.JSON;
-import com.github.myyingjie.commoninsert.bean.ConStant;
-import com.github.myyingjie.commoninsert.bean.DataSourceProperties;
-import com.github.myyingjie.commoninsert.bean.InsertParam;
-import com.github.myyingjie.commoninsert.bean.InsertRule;
+import com.github.myyingjie.commoninsert.bean.*;
 import com.github.myyingjie.commoninsert.config.SQLExecutorConfig;
+import com.github.myyingjie.commoninsert.exception.BizException;
 import com.github.myyingjie.commoninsert.service.InsertService;
 import com.github.myyingjie.commoninsert.strategy.DataSourceType;
 import com.github.myyingjie.commoninsert.strategy.FieldType;
+import com.github.myyingjie.commoninsert.strategy.InsertRule;
+import com.github.myyingjie.commoninsert.strategy.SqlFieldType;
+import com.github.myyingjie.commoninsert.util.DatasourceFileUtil;
+import com.github.myyingjie.commoninsert.util.JarUtil;
+import com.github.myyingjie.commoninsert.util.JsonFormatTool;
 import com.github.myyingjie.commoninsert.util.RandomUtil;
 import com.heitaox.sql.executor.SQLExecutor;
 import com.heitaox.sql.executor.core.entity.Tuple2;
 import com.heitaox.sql.executor.core.util.DateUtils;
 import com.heitaox.sql.executor.source.DataSource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * created by Yingjie Zheng at 2019-10-12 17:23
  */
 @Service
 @Slf4j
-public class InsertServiceImpl implements InsertService {
+public class InsertServiceImpl implements InsertService, InitializingBean {
 
     @Autowired
     private SQLExecutor sqlExecutor;
 
     @Autowired
     private SQLExecutorConfig sqlExecutorConfig;
+
+
+    private final Map<String, InsertParam> insertParamMap = new ConcurrentHashMap<>();
+
+    private final static String RESOURCE_FILE_NAME = "history.json";
 
 
     /**
@@ -56,12 +78,11 @@ public class InsertServiceImpl implements InsertService {
      * constant.put("constant","String|星宿老仙" );
      * constant.put("sex","String|男,女");
      */
-
     @Override
-    public int insert(InsertParam insertParam) throws Exception {
+    public  int insert(InsertParam insertParam) throws Exception {
         String database = insertParam.getDatabase();
         if (!sqlExecutorConfig.dataSourcePropertiesMap.containsKey(insertParam.getDatabase())) {
-            throw new RuntimeException("no data source of " + insertParam.getDatabase() + " find,Please configure the data source first ");
+            throw new BizException("no data source of " + insertParam.getDatabase() + " find,Please configure the data source first ");
         }
         DataSourceProperties dataSourceProperties = sqlExecutorConfig.dataSourcePropertiesMap.get(insertParam.getDatabase());
         Map<String, DataSource> dataSourceMap = sqlExecutorConfig.dataSourceMap;
@@ -86,6 +107,101 @@ public class InsertServiceImpl implements InsertService {
         return sqlExecutor.executeInsert(sql);
     }
 
+    @Override
+    public InsertParamVo detail(String tableName) {
+        InsertParam insertParam = insertParamMap.get(tableName);
+        if (insertParam == null) {
+            throw new BizException("no tableName:{" + tableName + "} of param find");
+        }
+        InsertParamVo insertParamVo = new InsertParamVo();
+        BeanUtils.copyProperties(insertParam, insertParamVo);
+        return insertParamVo;
+    }
+
+    @Override
+    public synchronized void delete(String tableName) throws IOException {
+        String s = DatasourceFileUtil.readResourcesJsonFile(RESOURCE_FILE_NAME);
+        List<InsertParam> list = JSON.parseArray(s, InsertParam.class);
+        list.removeIf(next -> next.getTableName().equalsIgnoreCase(tableName));
+        String json = "[\n" +
+                "]";
+        if (list.size() != 0) {
+            json = JSON.toJSONString(list);
+        }
+        DatasourceFileUtil.write(RESOURCE_FILE_NAME, JsonFormatTool.formatJson(json));
+
+        insertParamMap.remove(tableName);
+    }
+
+    @Override
+    public List<ParamListVo> paramList() {
+        return insertParamMap
+                .values()
+                .stream()
+                .map(insertParam -> new ParamListVo(insertParam.getTableName(), insertParam.getDatabase()))
+                .collect(Collectors.toList());
+    }
+
+
+    @Override
+    public InsertParamVo transform(String sql) {
+        List<SQLStatement> sqlStatements = SQLUtils.parseStatements(sql, "mysql");
+        SQLStatement sqlStatement = sqlStatements.get(0);
+        //查询语句
+        InsertParamVo insertParamVo = new InsertParamVo();
+        if (sqlStatement instanceof SQLCreateTableStatement) {
+            SQLCreateTableStatement createStatement = (SQLCreateTableStatement) sqlStatement;
+            SQLExprTableSource tableSource = createStatement.getTableSource();
+            String tableName = ((SQLIdentifierExpr) tableSource.getExpr()).getName();
+
+            insertParamVo.setTableName(removeFloat(tableName));
+            List<SQLTableElement> tableElementList = createStatement.getTableElementList();
+            LinkedHashMap<String, String> constant = tableElementList.stream()
+                    .filter(sqlTableElement -> sqlTableElement instanceof SQLColumnDefinition)
+                    .map(sqlTableElement -> (SQLColumnDefinition) sqlTableElement)
+                    .map(sqlColumnDefinition -> {
+                        SQLIdentifierExpr name = (SQLIdentifierExpr) sqlColumnDefinition.getName();
+                        SQLDataType dataType = sqlColumnDefinition.getDataType();
+                        FieldType fieldType = SqlFieldType.transToFieldType(dataType.getName());
+                        String type = fieldType.getValue();
+                        String value = dataType.toString();
+
+                        return new Tuple2<>(removeFloat(name.getName()), type+"|"+value);
+                    }).reduce(
+                            new LinkedHashMap<>(),
+                            (map, tuple2) -> {
+                                map.put(tuple2.getV1(), tuple2.getV2());
+                                return map;
+                            },
+                            (map1, map2) -> {
+                                map1.putAll(map2);
+                                return map1;
+                            }
+                    );
+            insertParamVo.setConstant(constant);
+        } else {
+            throw new BizException("只能接收建表语句！！！");
+        }
+        insertParamMap.put(insertParamVo.getTableName(), insertParamVo);
+        return insertParamVo;
+    }
+
+    @Override
+    public void save(InsertParam insertParam) throws IOException {
+        Objects.requireNonNull(insertParam.getTableName(), "表名不能为空！");
+        Objects.requireNonNull(insertParam.getDatabase(), "库名不能为空！");
+        insertParamMap.put(insertParam.getTableName(), insertParam);
+        persistence(insertParam.getTableName());
+
+    }
+
+    private String removeFloat(String str) {
+        if (str.startsWith("`")) {
+            str = str.replaceAll("`", "");
+        }
+        return str;
+    }
+
     private String spliceSql(InsertParam insertParam) {
         StringBuilder sb = new StringBuilder("INSERT INTO ");
         sb.append(insertParam.getTableName()).append(" (");
@@ -97,7 +213,9 @@ public class InsertServiceImpl implements InsertService {
             for (Map.Entry<String, String> entry : constantField.entrySet()) {
                 String field = entry.getKey();
                 sb.append(field).append(", ");
-                fieldValueIndex.add(new Tuple2<>(entry.getValue().split(ConStant.SEPARATOR), InsertRule.CONSTANT));
+                String[] valueSchema = entry.getValue().split(ConStant.SEPARATOR);
+                InsertRule.CONSTANT.checkParam(valueSchema,field);
+                fieldValueIndex.add(new Tuple2<>(valueSchema, InsertRule.CONSTANT));
             }
         }
 
@@ -106,7 +224,9 @@ public class InsertServiceImpl implements InsertService {
             for (Map.Entry<String, String> entry : randomField.entrySet()) {
                 String field = entry.getKey();
                 sb.append(field).append(", ");
-                fieldValueIndex.add(new Tuple2<>(entry.getValue().split(ConStant.SEPARATOR), InsertRule.RANDOM));
+                String[] valueSchema = entry.getValue().split(ConStant.SEPARATOR);
+                InsertRule.RANDOM.checkParam(valueSchema,field);
+                fieldValueIndex.add(new Tuple2<>(valueSchema, InsertRule.RANDOM));
             }
         }
 
@@ -115,7 +235,9 @@ public class InsertServiceImpl implements InsertService {
             for (Map.Entry<String, String> entry : increaseField.entrySet()) {
                 String field = entry.getKey();
                 sb.append(field).append(", ");
-                fieldValueIndex.add(new Tuple2<>(entry.getValue().split(ConStant.SEPARATOR), InsertRule.INCREASE));
+                String[] valueSchema = entry.getValue().split(ConStant.SEPARATOR);
+                InsertRule.INCREASE.checkParam(valueSchema,field);
+                fieldValueIndex.add(new Tuple2<>(valueSchema, InsertRule.INCREASE));
             }
         }
 
@@ -181,7 +303,7 @@ public class InsertServiceImpl implements InsertService {
             if (maxDate != null && minDate != null) {
                 //有最大值也有最小值
                 if (maxDate.isBefore(minDate)) {
-                    throw new RuntimeException("最大日期时间必须大于最小日期时间");
+                    throw new BizException("最大日期时间必须大于最小日期时间");
                 }
                 long between = ChronoUnit.SECONDS.between(minDate, maxDate);
                 finalDate = minDate.plusSeconds(random.nextInt((int) between)).format(DateUtils.dateTimeFormatter);
@@ -233,7 +355,7 @@ public class InsertServiceImpl implements InsertService {
             if (maxDate != null && minDate != null) {
                 //有最大值也有最小值
                 if (maxDate.isBefore(minDate)) {
-                    throw new RuntimeException("最大日期必须大于最小日期");
+                    throw new BizException("最大日期必须大于最小日期");
                 }
                 long between = ChronoUnit.DAYS.between(minDate, maxDate);
                 finalDate = minDate.plusDays(random.nextInt((int) between)).format(DateUtils.yyyyMMdd);
@@ -348,4 +470,39 @@ public class InsertServiceImpl implements InsertService {
         }
     }
 
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        //读取 history.json文件
+        String s = DatasourceFileUtil.readResourcesJsonFile(RESOURCE_FILE_NAME);
+        List<InsertParam> insertParams = JSON.parseArray(s, InsertParam.class);
+        insertParams.forEach(insertParam -> insertParamMap.put(insertParam.getTableName(), insertParam));
+        log.info("init insertParamList completed!");
+    }
+
+    @Override
+    @SuppressWarnings("all")
+    public void persistence(String tableName) throws IOException {
+        //读取 history.json文件
+        String s = DatasourceFileUtil.readResourcesJsonFile(RESOURCE_FILE_NAME);
+        List<InsertParam> insertParams = JSON.parseArray(s, InsertParam.class);
+        insertParams.removeIf(new Predicate<InsertParam>() {
+            @Override
+            public boolean test(InsertParam insertParam) {
+                return insertParam.getTableName().equalsIgnoreCase(tableName);
+            }
+        });
+        insertParams.add(insertParamMap.get(tableName));
+        //写回文件
+        String json = JsonFormatTool.formatJson(JSON.toJSONString(insertParams));
+        String filePath = JarUtil.getJarDir()+File.separator + "data"+File.separator+RESOURCE_FILE_NAME;
+        if(filePath.startsWith("file:")){
+            filePath = filePath.substring(5);
+        }
+        File jsonFile = new File(filePath);
+
+        try(FileOutputStream fis = new FileOutputStream(jsonFile)) {
+            fis.write(json.getBytes(StandardCharsets.UTF_8));
+        }
+
+    }
 }

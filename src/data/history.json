@@ -1,25 +1,123 @@
 [
-  {
-    "num": 1,
-    "database": "tests",
-    "tableName": "user",
-    "increase": {
-      "name": "String|0|-1|张三|-1",
-      "id": "String|10|-1|-1|-1",
-      "phone": "String|0|4|188188|-1",
-      "createDateTime": "DateTime|2019-09-30 00:00:00|-1|-1|-1|-1"
-    },
-    "random": {
-      "age": "Integer|-1|100|20|false|-1|-1|false|1|0",
-      "identity_no": "String|12|-1|-1|true|-1|-1|true|0|0",
-      "createDate": "Date|-1|-1|-1|false|-1|-1|0|false",
-      "updateDate": "Date|-1|2019-09-30|2019-09-01|false|-1|-1|0|false",
-      "updateDateTime": "DateTime|-1|2019-09-30 00:00:00|2019-09-01 00:00:00|false|-1|-1|false",
-      "amount":"Decimal|-1|0|100|false|-1|-1|false|1|2"
-    },
-    "constant": {
-      "constant": "String|星宿老仙",
-      "sex": "String|男,女"
-    }
-  }
+   {
+      "constant":
+      {
+         "constant":"String|星宿老仙","sex":"String|男,女"
+      },
+      "database":"tests","increase":
+      {
+         "name":"String|0|-1|张三|-1","id":"String|10|-1|-1|-1","phone":"String|0|4|188188|-1","createDateTime":"DateTime|2019-09-30 00:00:00|-1|-1|-1|-1"
+      },
+      "num":1,"random":
+      {
+         "age":"Integer|-1|100|20|false|-1|-1|false|1|0","identity_no":"String|12|-1|-1|true|-1|-1|true|0|0","createDate":"Date|-1|-1|-1|false|-1|-1|0|false","updateDate":"Date|-1|2019-09-30|2019-09-01|false|-1|-1|0|false","updateDateTime":"DateTime|-1|2019-09-30 00:00:00|2019-09-01 00:00:00|false|-1|-1|false","amount":"Decimal|-1|0|100|false|-1|-1|false|1|2"
+      },
+      "tableName":"user"
+   },
+   {
+      "constant":
+      {
+         "constant":"String|星宿老仙","sex":"String|男,女"
+      },
+      "database":"t_score","increase":
+      {
+         "name":"String|0|-1|张三|-1","id":"String|10|-1|-1|-1","phone":"String|0|4|188188|-1","createDateTime":"DateTime|2019-09-30 00:00:00|-1|-1|-1|-1"
+      },
+      "num":3,"random":
+      {
+         "age":"Integer|-1|100|20|false|-1|-1|false|1|0","identity_no":"String|12|-1|-1|true|-1|-1|true|0|0","createDate":"Date|-1|-1|-1|false|-1|-1|0|false","updateDate":"Date|-1|2019-09-30|2019-09-01|false|-1|-1|0|false","updateDateTime":"DateTime|-1|2019-09-30 00:00:00|2019-09-01 00:00:00|false|-1|-1|false","amount":"Decimal|-1|0|100|false|-1|-1|false|1|2"
+      },
+      "tableName":"t_score"
+   },
+   {
+      "constant":
+      {
+         "constant":"String|星宿老仙","sex":"String|男,女"
+      },
+      "database":"tests","increase":
+      {
+         "name":"String|0|-1|张三|-1","id":"String|10|-1|-1|-1","phone":"String|0|4|188188|-1","createDateTime":"DateTime|2019-09-30 00:00:00|-1|-1|-1"
+      },
+      "num":0,"random":
+      {
+         "age":"Integer|-1|100|20|false|-1|-1|false|1|0","identity_no":"String|12|-1|-1|true|-1|-1|true|0|0","createDate":"Date|-1|-1|-1|false|-1|-1|0|false|undefined","updateDate":"Date|-1|2019-09-30|2019-09-01|false|-1|-1|0|false|undefined","updateDateTime":"DateTime|-1|2019-09-30 00:00:00|2019-09-01 00:00:00|false|-1|-1|false|undefined|undefined","amount":"Decimal|-1|0|100|false|-1|-1|false|1|2"
+      },
+      "tableName":"user"
+   },
+   {
+      "constant":
+      {
+         "constant":"String|星宿老仙","sex":"String|男,女"
+      },
+      "database":"tests","increase":
+      {
+         "name":"String|0|-1|张三|-1","id":"String|10|-1|-1|-1","phone":"String|0|4|188188|-1","createDateTime":"DateTime|2019-09-30 00:00:00|-1|-1|-1"
+      },
+      "num":0,"random":
+      {
+         "age":"Integer|-1|100|200|false|-1|-1|false|1|0","identity_no":"String|12|-1|-1|true|-1|-1|true|0|0","createDate":"Date|-1|-1|-1|false|-1|-1|0|false|undefined","updateDate":"Date|-1|2019-09-30|2019-09-01|false|-1|-1|0|false|undefined","updateDateTime":"DateTime|-1|2019-09-30 00:00:00|2019-09-01 00:00:00|false|-1|-1|false|undefined|undefined","amount":"Decimal|-1|0|100|false|-1|-1|false|1|2"
+      },
+      "tableName":"user"
+   },
+   {
+      "constant":
+      {
+         "constant":"String|星宿老仙","sex":"String|男,女"
+      },
+      "database":"tests","increase":
+      {
+         "name":"String|0|-1|张三|-1","id":"String|10|-1|-1|-1","phone":"String|0|4|188188|-1","createDateTime":"DateTime|5|-1|-1|-1"
+      },
+      "num":0,"random":
+      {
+         "age":"Integer|-1|100|50|false|-1|-1|false|1|0","identity_no":"String|12|-1|-1|true|-1|-1|true|0|0","createDate":"Date|-1|-1|-1|false|-1|-1|true||-1","updateDate":"Date|-1|2019-09-30|2019-09-01|false|-1|-1|false||undefined","updateDateTime":"DateTime|-1|2019-09-30 00:00:00|2019-09-01 00:00:00|false|-1|-1|false|undefined|undefined","amount":"Decimal|-1|100|0|false|-1|-1|false|1|2"
+      },
+      "tableName":"user"
+   },
+   {
+      "constant":
+      {
+         "constant":"String|星宿老仙","sex":"String|男,女"
+      },
+      "database":"tests","increase":
+      {
+         "name":"String|0|-1|张三|-1","id":"String|10|-1|-1|-1","phone":"String|0|4|188188|-1","createDateTime":"DateTime|2019-10-21 21:00:00|-1|-1|-1"
+      },
+      "num":4,"random":
+      {
+         "age":"Integer|-1|100|50|false|-1|-1|false|1|0","identity_no":"String|12|-1|-1|true|-1|-1|true|0|0","createDate":"Date|-1|-1|-1|false|-1|-1|true||-1","updateDate":"Date|-1|2019-09-30|2019-09-01|false|-1|-1|false||undefined","updateDateTime":"DateTime|-1|2019-09-30 00:00:00|2019-09-01 00:00:00|false|-1|-1|false|undefined|undefined","amount":"Decimal|-1|100|0|false|-1|-1|false|1|2"
+      },
+      "tableName":"user"
+   },
+   {
+      "constant":
+      {
+         "constant":"String|星宿老仙","sex":"String|男,女"
+      },
+      "database":"tests","increase":
+      {
+         "name":"String|0|-1|张三|-1","id":"String|10|-1|-1|-1","phone":"String|0|4|188188|-1","createDateTime":"DateTime|2019-10-21 21:00:00|-1|-1|-1"
+      },
+      "num":0,"random":
+      {
+         "age":"Integer|-1|100|50|false|-1|-1|false|1|0","identity_no":"String|12|-1|-1|true|-1|-1|true|0|0","createDate":"Date|-1|-1|-1|false|-1|-1|true|2|-1","updateDate":"Date|-1|2019-09-30|2019-09-01|false|-1|-1|false|2|-1","updateDateTime":"DateTime|-1|2019-09-30 00:00:00|2019-09-01 00:00:00|false|-1|-1|false|0|-1","amount":"Decimal|-1|100|0|false|-1|-1|false|1|2"
+      },
+      "tableName":"user"
+   },
+   {
+      "constant":
+      {
+         "constant":"String|星宿老仙","sex":"String|男,女"
+      },
+      "database":"tests","increase":
+      {
+         "name":"String|0|-1|张三|-1","id":"String|100|-1|-1|-1","phone":"String|0|4|188188|-1","createDateTime":"DateTime|2019-10-21 21:00:00|-1|-1|-1"
+      },
+      "num":100,"random":
+      {
+         "age":"Integer|-1|100|50|false|-1|-1|false|1|0","identity_no":"String|12|-1|-1|true|-1|-1|true|0|0","createDate":"Date|-1|-1|-1|false|-1|-1|true|2|-1","updateDate":"Date|-1|2019-09-30|2019-09-01|false|-1|-1|false|2|-1","updateDateTime":"DateTime|-1|2019-09-30 00:00:00|2019-09-01 00:00:00|false|-1|-1|false|0|-1","amount":"Decimal|-1|100|0|false|-1|-1|false|1|2"
+      },
+      "tableName":"user"
+   }
+
 ]

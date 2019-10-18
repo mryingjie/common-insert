@@ -1,6 +1,7 @@
 package com.github.myyingjie.commoninsert.util;
 
 import com.github.myyingjie.commoninsert.bean.ConStant;
+import com.github.myyingjie.commoninsert.exception.BizException;
 import com.github.myyingjie.commoninsert.strategy.CharacterStrategyEnum;
 
 import java.math.BigDecimal;
@@ -61,10 +62,10 @@ public class RandomUtil {
             // 既有最大值 也有最小值
             //有最小值
             if (max.compareTo(min) < 0) {
-                throw new RuntimeException("最大值不能小于最小值");
+                throw new BizException("最大值不能小于最小值");
             }
             if (min.compareTo(new BigDecimal(0)) < 0) {
-                throw new RuntimeException("不能生成负数");
+                throw new BizException("不能生成负数");
             }
             do {
                 sb = new StringBuilder();
@@ -133,7 +134,7 @@ public class RandomUtil {
      * 随机生成任意长度的字符
      */
     public static String randomStr(Random random, int len, int characterStrategy) {
-        if (len == -1) {
+        if (len == -1 || len == 0) {
             len = 10;
         }
         return CharacterStrategyEnum.getByStrategyCode(characterStrategy).randomStr(random, len);

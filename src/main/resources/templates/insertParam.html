@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <script src="../layui/layui.js"></script>
+    <link rel="stylesheet" href="../layui/css/layui.css">
+    <link rel="stylesheet" href="../css/style.css">
+
+
+    <title>通用数据生成工具</title>
+    <style>
+
+
+    </style>
+</head>
+<body>
+<input type="hidden" id="initTableName" name="tableName" th:value="${tableName}">
+<div class="container">
+    <div class="content">
+        <h1 class="local_area">数据插入表单>详情</h1>
+        <form id="form">
+            <div class="search border main-search">
+                <h2 class="local_area" style="font-size: 16px;font-weight: lighter">基础信息</h2>
+                <hr style="color:#2b82de;background-color: #2b82de ;height: 2px;border: none">
+                <div class="s_one inputs_item" type="input">
+                    <label style="width: 120px">库名<span style="color: red; ">*</span></label>
+                    <select class="s_select w280" id="database" name="database"></select>
+                </div>
+                <div class="s_one inputs_item" type="input">
+                    <label style="width: 120px">表名<span style="color: red; ">*</span></label>
+                    <input type="text" class="inpt" id="tableName" name="tableName"/>
+                </div>
+
+                <div class="clear" style="height: 20px"></div>
+            </div>
+            <!--常量字段-->
+            <div class="search border main-search">
+                <h2 class="local_area" style="font-size: 16px;font-weight: lighter">常量字段</h2>
+                <hr style="color:#2b82de;background-color: #2b82de ;height: 2px;border: none">
+                <div class="tablebox mar20">
+                    <!--main-list-->
+                    <table cellpadding="0" cellspacing="0" class="table">
+                        <thead>
+                        <tr>
+                            <th>序号</th>
+                            <th>字段名</th>
+                            <th>类型</th>
+                            <th>值(以,分隔)</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody id="constantTbody">
+
+                        </tbody>
+                    </table>
+                </div>
+                <hr style="color:#2b82de;background-color: rgba(43,130,222,0) ;height: 2px;border: none">
+
+                <div class="clear"></div>
+                <div class="layui-form-item">
+                    <div class="layui-input-block" style="float:right" onclick="addField({fieldType:'constant'})">
+                        <button type="button" class="layui-btn layui-btn-radius layui-btn-normal"
+                                onclick="add('constant')">新增
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!--随机字段-->
+            <div class="search border main-search">
+                <h2 class="local_area" style="font-size: 16px;font-weight: lighter">随机字段 <span
+                        style="color: #cb0f0e; size: 20px">注：所有-1代表本项值任意或无意义    </span><span style="color: #FF5722;font-weight: bold">    字符策略(0:任意 1:纯数字 2:纯字母 3:纯汉字 4:数字+字母 5:数字+汉字 6:字母+汉字)</span></h2>
+                <hr style="color:#2b82de;background-color: #2b82de ;height: 2px;border: none">
+                <div class="tablebox mar20">
+                    <!--main-list-->
+                    <table cellpadding="0" cellspacing="0" class="table">
+                        <thead>
+                        <tr>
+                            <th>序号</th>
+                            <th>字段名</th>
+                            <th>类型</th>
+                            <th>长度</th>
+                            <th>最大值</th>
+                            <th>最小值</th>
+                            <th>是否固定位数</th>
+                            <th>前缀</th>
+                            <th>后缀</th>
+                            <th>是否唯一</th>
+                            <th>字符策略</th>
+                            <th>小数位数</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody id="randomTbody">
+
+                        </tbody>
+                    </table>
+                </div>
+                <hr style="color:#2b82de;background-color: rgba(43,130,222,0) ;height: 2px;border: none">
+
+                <div class="clear"></div>
+                <div class="layui-form-item">
+                    <div class="layui-input-block" style="float:right" onclick="editField({fieldType:'random'})">
+                        <button type="button" class="layui-btn layui-btn-radius layui-btn-normal"
+                                onclick="add('random')">新增
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <!--自增字段-->
+            <div class="search border main-search">
+                <h2 class="local_area" style="font-size: 16px;font-weight: lighter">自增字段 <span
+                        style="color: #cb0f0e; size: 20px">注：所有-1代表本项值任意或无意义</span></h2>
+                <hr style="color:#2b82de;background-color: #2b82de ;height: 2px;border: none">
+                <div class="tablebox mar20">
+                    <!--main-list-->
+                    <table cellpadding="0" cellspacing="0" class="table">
+                        <thead>
+                        <tr>
+                            <th>序号</th>
+                            <th>字段名</th>
+                            <th>类型</th>
+                            <th>从几开始</th>
+                            <th>位数</th>
+                            <th>前缀</th>
+                            <th>后缀</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody id="increaseTbody">
+
+                        </tbody>
+                    </table>
+                </div>
+                <hr style="color:#2b82de;background-color: rgba(43,130,222,0) ;height: 2px;border: none">
+
+                <div class="clear"></div>
+                <div class="layui-form-item">
+                    <div class="layui-input-block" style="float:right" onclick="editField({fieldType:'increase'})">
+                        <button type="button" class="layui-btn layui-btn-radius layui-btn-normal"
+                                onclick="add('increase')">新增
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="clear"></div>
+            <div class="search border main-search">
+                <div class="s_btn cancel_submit_btn" onclick="back()" style="float: right">
+                    <label>后退</label>
+                </div>
+                <div class="s_btn confirm_submit_btn" onclick="saveAndInsert()" style="float: right">
+                    <label>保存并插入</label>
+                </div>
+                <div class="s_btn confirm_submit_btn" onclick="saveParam()" style="float: right">
+                    <label>保存</label>
+                </div>
+            </div>
+
+
+        </form>
+
+        <!--   修改字段生成策略 POP-->
+        <div class="pop" id="update_pop" style="display:none; width: 150px;">
+            <input type="hidden" id="update_hidden" name="update_hidden">
+            <div style="display:none;"></div>
+            <input type="hidden" id="update_opt" name="update_opt">
+            <div class="pop_bg"></div><!--遮罩-->
+            <div class="pop_box info-jk" style="width: 80%;background:white" id="update_pop_box">
+                <h1 class="local_area">修改字段生成策略</h1>
+                <div class="c-lose add_close" style="float: right"><a style="font-size: 16px" href="javascript:void(0);"
+                                                                      onclick="closeUpdatePop()"><span
+                        style="color: black; size: 20px">X</span></a></div>
+                <hr style="color:#2b82de;background-color: #2b82de ;height: 2px;border: none">
+                <div class="s_one inputs_item" type="input">
+                    <label style="width: 120px">字段名<span style="color: red; ">*</span></label>
+                    <input type="text" class="update_field" id="update_field" name="field"/>
+                </div>
+                <div class="s_one inputs_item" type="input">
+                    <label style="width: 120px">字段类型<span style="color: red; ">*</span></label>
+                    <select class="type" id="update_opt_type" name="type" style="width: 280px"
+                            onchange="changeUpdateTypeFromChange($(this))">
+                        <option value="constant">常量</option>
+                        <option value="random">随机</option>
+                        <option value="increase">自增</option>
+                    </select>
+                </div>
+                <div class="clear"></div>
+
+                <!--随机字段-->
+                <div id="update_random_div" style="display: none">
+                    <div class="s_one inputs_item" type="input">
+                        <label style="width: 120px">值类型<span style="color: red; ">*</span></label>
+                        <select class="type" id="update_random_type" name="random_type" style="width: 280px">
+                            <option value="String">String</option>
+                            <option value="Integer">Integer</option>
+                            <option value="Decimal">Decimal</option>
+                            <option value="Long">Long</option>
+                            <option value="Double">Double</option>
+                            <option value="Date">Date</option>
+                            <option value="DateTime">DateTime</option>
+                        </select>
+                    </div>
+                    <div class="s_one inputs_item" type="input">
+                        <label style="width: 120px">长度<span style="color: red; ">*</span></label>
+                        <input type="text" class="length" id="update_random_length" name="length"/>
+                    </div>
+                    <div class="clear"></div>
+                    <div class="s_one inputs_item" type="input">
+                        <label style="width: 120px">最大值<span style="color: red; ">*</span></label>
+                        <input type="text" class="max" id="update_random_max" name="max"/>
+                    </div>
+                    <div class="s_one inputs_item" type="input">
+                        <label style="width: 120px">最小值<span style="color: red; ">*</span></label>
+                        <input type="text" class="min" id="update_random_min" name="min"/>
+                    </div>
+                    <div class="clear"></div>
+                    <div class="s_one inputs_item" type="input">
+                        <label style="width: 120px">是否固定位数<span style="color: red; ">*</span></label>
+                        <select class="type" id="update_random_isFixedLength" name="isFixedLength" style="width: 280px">
+                            <option value="false">false</option>
+                            <option value="true">true</option>
+                        </select>
+                    </div>
+                    <div class="s_one inputs_item" type="input">
+                        <label style="width: 120px">前缀<span style="color: red; ">*</span></label>
+                        <input type="text" class="prefix" id="update_random_prefix" name="prefix"/>
+                    </div>
+                    <div class="clear"></div>
+                    <div class="s_one inputs_item" type="input">
+                        <label style="width: 120px">后缀<span style="color: red; ">*</span></label>
+                        <input type="text" class="suffix" id="update_random_suffix" name="suffix"/>
+                    </div>
+                    <div class="s_one inputs_item" type="input">
+                        <label style="width: 120px">是否唯一<span style="color: red; ">*</span></label>
+                        <select class="type" id="update_random_isUnique" name="isUnique" style="width: 280px">
+                            <option value="false">false</option>
+                            <option value="true">true</option>
+                        </select>
+                    </div>
+                    <div class="clear"></div>
+                    <!-- 0:任意 1:纯数字 2:纯字母 3:纯汉字 4:数字+字母 5:数字+汉字 6:字母+汉字-->
+                    <div class="s_one inputs_item" type="input">
+                        <label style="width: 120px">字符策略<span style="color: red; ">*</span></label>
+                        <select class="characterStrategy" id="update_random_characterStrategy" name="characterStrategy"
+                                style="width: 280px">
+                            <option value="0">任意</option>
+                            <option value="1">纯数字</option>
+                            <option value="2">纯字母</option>
+                            <option value="3">纯汉字</option>
+                            <option value="4">数字+字母</option>
+                            <option value="5">数字+汉字</option>
+                            <option value="6">字母+汉字</option>
+                        </select>
+                    </div>
+                    <div class="s_one inputs_item" type="input">
+                        <label style="width: 120px">小数位数<span style="color: red; ">*</span></label>
+                        <input type="text" class="decimalLength" id="update_random_decimalLength" name="decimalLength"/>
+                    </div>
+                    <div class="clear"></div>
+                    <div class="pagelistwrapper"></div>
+                    <div class="s_btn " onclick="closeUpdatePop()" style="float: right">取消</div>
+                    <div class="s_btn bg_red left mr30 submit_btn" onclick="update_confirm()" style="float: right">确认
+                    </div>
+                </div>
+
+                <!--自增字段-->
+                <div id="update_increase_div" style="display: none">
+                    <div class="s_one inputs_item" type="input">
+                        <label style="width: 120px">值类型<span style="color: red; ">*</span></label>
+                        <select class="type" id="update_increase_type" name="increase_type" style="width: 280px">
+                            <option value="String">String</option>
+                            <option value="Integer">Integer</option>
+                            <option value="Decimal">Decimal</option>
+                            <option value="Long">Long</option>
+                            <option value="Double">Double</option>
+                            <option value="Date">Date</option>
+                            <option value="DateTime">DateTime</option>
+                        </select>
+                    </div>
+                    <div class="s_one inputs_item" type="input">
+                        <label style="width: 120px">从几开始<span style="color: red; ">*</span></label>
+                        <input type="text" class="from" id="update_increase_from" name="from"/>
+                    </div>
+                    <div class="clear"></div>
+                    <div class="s_one inputs_item" type="input">
+                        <label style="width: 120px">长度<span style="color: red; ">*</span></label>
+                        <input type="text" class="length" id="update_increase_length" name="length"/>
+                    </div>
+                    <div class="s_one inputs_item" type="input">
+                        <label style="width: 120px">前缀<span style="color: red; ">*</span></label>
+                        <input type="text" class="prefix" id="update_increase_prefix" name="prefix"/>
+                    </div>
+                    <div class="s_one inputs_item" type="input">
+                        <label style="width: 120px">后缀<span style="color: red; ">*</span></label>
+                        <input type="text" class="suffix" id="update_increase_suffix" name="suffix"/>
+                    </div>
+                    <div class="clear"></div>
+                    <div class="pagelistwrapper"></div>
+                    <div class="s_btn " onclick="closeUpdatePop()" style="float: right">取消</div>
+                    <div class="s_btn bg_red left mr30 submit_btn" onclick="update_confirm()" style="float: right">确认
+                    </div>
+                </div>
+
+
+                <!--常量字段-->
+                <div id="update_constant_div" style="display: none">
+                    <div class="s_one inputs_item" type="input">
+                        <label style="width: 120px">值类型<span style="color: red; ">*</span></label>
+                        <select class="type" id="update_constant_type" name="constant_type" style="width: 280px">
+                            <option value="String">String</option>
+                            <option value="Integer">Integer</option>
+                            <option value="Decimal">Decimal</option>
+                            <option value="Long">Long</option>
+                            <option value="Double">Double</option>
+                            <option value="Date">Date</option>
+                            <option value="DateTime">DateTime</option>
+                        </select>
+                    </div>
+                    <div class="s_one inputs_item" type="input">
+                        <label style="width: 120px">值(以,分隔)<span style="color: red; ">*</span></label>
+                        <input type="text" class="constant_value" id="update_constant_value" name="constant_value"/>
+                    </div>
+                    <div class="clear"></div>
+                    <div class="pagelistwrapper"></div>
+                    <div class="s_btn " onclick="closeUpdatePop()" style="float: right">取消</div>
+                    <div class="s_btn bg_red left mr30 submit_btn" onclick="update_confirm()" style="float: right">确认
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+<!--        确认弹框-->
+        <div class="pop" id="confirm_pop" style="display:none; width: 150px;">
+            <div class="pop_bg"></div><!--遮罩-->
+            <div class="pop_box info-jk" style="width: 30%;background:white" id="confirm_pop_box">
+                <div class="s_one inputs_item" type="input">
+                    <label style="width: 160px">请输入生成几条数据<span style="color: red; ">*</span></label>
+                    <input type="text" class="row_num" id="row_num" name="row_num"/>
+                </div>
+                <div class="clear"></div>
+                <div class="pagelistwrapper"></div>
+                <div class="s_btn " onclick="closeConfirmPop()" style="float: right">取消</div>
+                <div class="s_btn bg_red left mr30 submit_btn" onclick="insert_confirm()" style="float: right">确认
+                </div>
+            </div>
+        </div>
+
+        <!--   增加字段生成策略 POP-->
+        <div class="pop" id="add_pop" style="display:none; width: 150px;">
+            <input type="hidden">
+            <div class="pop_bg"></div><!--遮罩-->
+            <div class="pop_box info-jk" style="width: 80%;background:white" id="add_pop_box">
+                <h1 class="local_area">增加字段生成策略</h1>
+                <div class="c-lose add_close" style="float: right"><a style="font-size: 16px"
+                                                                      href="javascript:void(0);"
+                                                                      onclick="closeAddPop()"><span
+                        style="color: black; size: 20px">X</span></a></div>
+                <hr style="color:#2b82de;background-color: #2b82de ;height: 2px;border: none">
+                <div class="s_one inputs_item" type="input">
+                    <label style="width: 120px">字段名<span style="color: red; ">*</span></label>
+                    <input type="text" class="add_field" id="add_field" name="add_field"/>
+                </div>
+                <div class="s_one inputs_item" type="input">
+                    <label style="width: 120px">字段类型<span style="color: red; ">*</span></label>
+                    <select class="type" id="add_opt_type" name="type" style="width: 280px"
+                            onchange="changeAddTypeFromChange($(this))">
+                        <option value="constant">常量</option>
+                        <option value="random">随机</option>
+                        <option value="increase">自增</option>
+                    </select>
+                </div>
+                <div class="clear"></div>
+                <div id="div_opt">
+
+                </div>
+
+                <!--随机字段-->
+                <div id="add_random_div" style="display: none">
+
+                    <div class="s_one inputs_item" type="input">
+                        <label style="width: 120px">值类型<span style="color: red; ">*</span></label>
+                        <select class="type" id="add_random_type" name="type" style="width: 280px">
+                            <option value="String">String</option>
+                            <option value="Integer">Integer</option>
+                            <option value="Decimal">Decimal</option>
+                            <option value="Long">Long</option>
+                            <option value="Double">Double</option>
+                            <option value="Date">Date</option>
+                            <option value="DateTime">DateTime</option>
+                        </select>
+                    </div>
+                    <div class="s_one inputs_item" type="input">
+                        <label style="width: 120px">长度<span style="color: red; ">*</span></label>
+                        <input type="text" class="length" id="add_random_length" value="-1" name="length"/>
+                    </div>
+                    <div class="clear"></div>
+                    <div class="s_one inputs_item" type="input">
+                        <label style="width: 120px">最大值<span style="color: red; ">*</span></label>
+                        <input type="text" class="max" id="add_random_max" value="-1" name="max"/>
+                    </div>
+                    <div class="s_one inputs_item" type="input">
+                        <label style="width: 120px">最小值<span style="color: red; ">*</span></label>
+                        <input type="text" class="min" id="add_random_min" value="-1" name="min"/>
+                    </div>
+                    <div class="clear"></div>
+                    <div class="s_one inputs_item" type="input">
+                        <label style="width: 120px">是否固定位数<span style="color: red; ">*</span></label>
+                        <select class="type" id="add_random_isFixedLength" name="isFixedLength" style="width: 280px">
+                            <option value="false">false</option>
+                            <option value="true">true</option>
+                        </select>
+                    </div>
+                    <div class="s_one inputs_item" type="input">
+                        <label style="width: 120px">前缀<span style="color: red; ">*</span></label>
+                        <input type="text" class="prefix" id="add_random_prefix" value="-1" name="prefix"/>
+                    </div>
+                    <div class="clear"></div>
+                    <div class="s_one inputs_item" type="input">
+                        <label style="width: 120px">后缀<span style="color: red; ">*</span></label>
+                        <input type="text" class="suffix" id="add_random_suffix" value="-1" name="suffix"/>
+                    </div>
+                    <div class="s_one inputs_item" type="input">
+                        <label style="width: 120px">是否唯一<span style="color: red; ">*</span></label>
+                        <select class="type" id="add_random_isUnique" name="isUnique" style="width: 280px">
+                            <option value="false">false</option>
+                            <option value="true">true</option>
+                        </select>
+                    </div>
+                    <div class="clear"></div>
+                    <!-- 0:任意 1:纯数字 2:纯字母 3:纯汉字 4:数字+字母 5:数字+汉字 6:字母+汉字-->
+                    <div class="s_one inputs_item" type="input">
+                        <label style="width: 120px">字符策略<span style="color: red; ">*</span></label>
+                        <select class="characterStrategy" id="add_random_characterStrategy" name="characterStrategy"
+                                style="width: 280px">
+                            <option value="0">任意</option>
+                            <option value="1">纯数字</option>
+                            <option value="2">纯字母</option>
+                            <option value="3">纯汉字</option>
+                            <option value="4">数字+字母</option>
+                            <option value="5">数字+汉字</option>
+                            <option value="6">字母+汉字</option>
+                        </select>
+                    </div>
+                    <div class="s_one inputs_item" type="input">
+                        <label style="width: 120px">小数位数<span style="color: red; ">*</span></label>
+                        <input type="text" class="decimalLength" value="-1" id="add_random_decimalLength"
+                               name="decimalLength"/>
+                    </div>
+                    <div class="clear"></div>
+                    <div class="pagelistwrapper"></div>
+                    <div class="s_btn " onclick="closeAddPop()" style="float: right">取消</div>
+                    <div class="s_btn bg_red left mr30 submit_btn" onclick="add_submit('random')"
+                         style="float: right">确认
+                    </div>
+                </div>
+
+                <!--自增字段-->
+                <div id="add_increase_div" style="display: none">
+                    <div class="s_one inputs_item" type="input">
+                        <label style="width: 120px">值类型<span style="color: red; ">*</span></label>
+                        <select class="type" id="increase_type" name="add_increase_type" style="width: 280px">
+                            <option value="String">String</option>
+                            <option value="Integer">Integer</option>
+                            <option value="Decimal">Decimal</option>
+                            <option value="Long">Long</option>
+                            <option value="Double">Double</option>
+                            <option value="Date">Date</option>
+                            <option value="DateTime">DateTime</option>
+                        </select>
+                    </div>
+                    <div class="s_one inputs_item" type="input">
+                        <label style="width: 120px">从几开始<span style="color: red; ">*</span></label>
+                        <input type="text" class="from" value="-1" id="add_increase_from" name="from"/>
+                    </div>
+                    <div class="clear"></div>
+                    <div class="s_one inputs_item" type="input">
+                        <label style="width: 120px">长度<span style="color: red; ">*</span></label>
+                        <input type="text" class="length" value="-1" id="add_increase_length" name="length"/>
+                    </div>
+                    <div class="s_one inputs_item" type="input">
+                        <label style="width: 120px">前缀<span style="color: red; ">*</span></label>
+                        <input type="text" class="prefix" value="-1" id="add_increase_prefix" name="prefix"/>
+                    </div>
+                    <div class="s_one inputs_item" type="input">
+                        <label style="width: 120px">后缀<span style="color: red; ">*</span></label>
+                        <input type="text" class="suffix" value="-1" id="add_increase_suffix" name="suffix"/>
+                    </div>
+                    <div class="clear"></div>
+                    <div class="pagelistwrapper"></div>
+                    <div class="s_btn " onclick="closeAddPop()" style="float: right">取消</div>
+                    <div class="s_btn bg_red left mr30 submit_btn" onclick="add_submit('increase')"
+                         style="float: right">确认
+                    </div>
+                </div>
+
+
+                <!--常量字段-->
+                <div id="add_constant_div" style="display: none">
+                    <div class="s_one inputs_item" type="input">
+                        <label style="width: 120px">值类型<span style="color: red; ">*</span></label>
+                        <select class="type" id="add_constant_type" name="constant_type" style="width: 280px">
+                            <option value="String">String</option>
+                            <option value="Integer">Integer</option>
+                            <option value="Decimal">Decimal</option>
+                            <option value="Long">Long</option>
+                            <option value="Double">Double</option>
+                            <option value="Date">Date</option>
+                            <option value="DateTime">DateTime</option>
+                        </select>
+                    </div>
+                    <div class="s_one inputs_item" type="input">
+                        <label style="width: 120px">值(以,分隔)<span style="color: red; ">*</span></label>
+                        <input type="text" class="constant_value" id="add_constant_value" name="constant_value"/>
+                    </div>
+                    <div class="clear"></div>
+                    <div class="pagelistwrapper"></div>
+                    <div class="s_btn " onclick="closeAddPop()" style="float: right">取消</div>
+                    <div class="s_btn bg_red left mr30 submit_btn" onclick="add_submit('constant')"
+                         style="float: right">确认
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- content end -->
+    </div>
+    <!-- container end -->
+</div>
+</div>
+</body>
+<script type="text/javascript">
+    var form, layer, $;
+    layui.use(['form', 'layer', 'jquery'], function () {
+        form = layui.form;
+        layer = layui.layer;
+        $ = layui.$;
+        $(function () {
+            initDatabaseList();
+            queryHistory();
+        });
+    });
+
+
+    //查询数据源列表
+    function queryHistory() {
+        var index = layer.load(2, {shade: [0.2, '#DDDDDD']});
+        var initTableName = $("#initTableName").attr("value");
+        $.ajax({
+            url: "/history/" + initTableName,
+            type: "GET",
+            success: function (ajaxResult) {
+                if (ajaxResult.success) {
+                    var insertParam = ajaxResult.data;
+                    $("#tableName").val(insertParam.tableName);
+                    $("#database").val(insertParam.database);
+                    renderTable(insertParam);
+                } else {
+                    layer.msg(ajaxResult.data, {icon: 2, time: 2500});
+                }
+                layer.close(index);
+            }
+        });
+
+    }
+
+    function renderTable(insertParam) {
+        var constant = insertParam.constant;
+        var random = insertParam.random;
+        var increase = insertParam.increase;
+
+        var constantTbody = $("#constantTbody");
+        constantTbody.empty();
+        if (constant && Object.keys(constant).length > 0) {
+            var j = 0;
+            var tbodyStr = "";
+            for (var i in constant) {
+                var field = i;
+                var value = constant[i];
+                var values = value.split("|");
+                tbodyStr += '<tr class="tr" opt="constant">\n' +
+                    '<td class="num">' + (j + 1) + '</td>\n' +
+                    '<td class="field" style="color: #cb0f0e;">' + field + '</td>\n' +
+                    '<td class="type">' + values[0] + '</td>\n' +
+                    '<td class="value">' + values[1] + '</td>\n' +
+                    '<td class="option">' +
+                    '<a class="a" href="javascript:void(0);" fieldType="constant" onclick="editField($(this),' + j + ')" > 编辑 </a>' +
+                    '<a class="a" href="javascript:void(0);" onclick="deleteFiled($(this))" >删除 </a>';
+                tbodyStr += '</td>\n';
+                tbodyStr += '</tr>';
+                j++;
+            }
+            constantTbody.html(tbodyStr);
+        } else {
+            constantTbody.html("<tr><td class='nothing' style='color:green;text-align: center' colspan='20'>Nothing to show！</td></tr>");
+        }
+
+
+        var randomTbody = $("#randomTbody");
+        randomTbody.empty();
+        if (random && Object.keys(random).length > 0) {
+            var j = 0;
+            var tbodyStr = "";
+            for (var i in random) {
+                var field = i;
+                var value = random[i];
+                var values = value.split("|");
+                tbodyStr += '<tr class="tr" opt="random">\n' +
+                    '<td class="num">' + (j + 1) + '</td>\n' +
+                    '<td class="field" style="color: #cb0f0e;">' + field + '</td>\n' +
+                    '<td class="type">' + values[0] + '</td>\n' +
+                    '<td class="length">' + values[1] + '</td>\n' +
+                    '<td class="max">' + values[2] + '</td>\n' +
+                    '<td class="min">' + values[3] + '</td>\n' +
+                    '<td class="isFixedLength">' + values[4] + '</td>\n' +
+                    '<td class="prefix">' + values[5] + '</td>\n' +
+                    '<td class="suffix">' + values[6] + '</td>\n' +
+                    '<td class="isUnique">' + values[7] + '</td>\n' +
+                    '<td class="characterStrategy">' + values[8] + '</td>\n' +
+                    '<td class="decimalLength">' + values[9] + '</td>\n' +
+                    '<td class="option">' +
+                    '<a class="a" href="javascript:void(0);" fieldType="random" onclick="editField($(this),' + j + ')" > 编辑 </a>' +
+                    '<a class="a" href="javascript:void(0);" onclick="deleteFiled($(this))" >删除 </a>';
+                tbodyStr += '</td>\n';
+                tbodyStr += '</tr>';
+                j++;
+            }
+            randomTbody.html(tbodyStr);
+        } else {
+            randomTbody.html("<tr><td class='nothing' style='color:green;text-align: center' colspan='20'>Nothing to show！</td></tr>");
+        }
+
+
+        var increaseTbody = $("#increaseTbody");
+        increaseTbody.empty();
+        if (increase && Object.keys(increase).length > 0) {
+            var j = 0;
+            var tbodyStr = "";
+            for (var i in increase) {
+                var field = i;
+                var value = increase[i];
+                var values = value.split("|");
+                tbodyStr += '<tr class="tr" opt="increase">\n' +
+                    '<td class="num">' + (j + 1) + '</td>\n' +
+                    '<td class="field" style="color: #cb0f0e;">' + field + '</td>\n' +
+                    '<td class="type">' + values[0] + '</td>\n' +
+                    '<td class="from">' + values[1] + '</td>\n' +
+                    '<td class="length">' + values[2] + '</td>\n' +
+                    '<td class="prefix">' + values[3] + '</td>\n' +
+                    '<td class="suffix">' + values[4] + '</td>\n' +
+                    '<td class="option">' +
+                    '<a class="a" href="javascript:void(0);" fieldType="increase" onclick="editField($(this),' + j + ')" > 编辑 </a>' +
+                    '<a class="a" href="javascript:void(0);" onclick="deleteFiled($(this))" >删除 </a>';
+                tbodyStr += '</td>\n';
+                tbodyStr += '</tr>';
+                j++;
+            }
+            increaseTbody.html(tbodyStr);
+        } else {
+            increaseTbody.html("<tr><td class='nothing' style='color:green;text-align: center' colspan='20'>Nothing to show！</td></tr>");
+        }
+    }
+
+    function add(opt) {
+        $('#add_pop').css("display", 'block');
+        var increase_div = $("#add_increase_div");
+        var random_div = $("#add_random_div");
+        var constant_div = $("#add_constant_div");
+        increase_div.css("display", 'none');
+        random_div.css("display", 'none');
+        constant_div.css("display", 'none');
+        if (opt === "random") {
+            //随机字段
+            random_div.css("display", 'block');
+
+        } else if (opt === "constant") {
+            //常量字段
+            constant_div.css("display", "block");
+        } else {
+            //自增字段
+            increase_div.css("display", 'block');
+        }
+        $("#add_opt_type").val(opt);
+    }
+
+    function initDatabaseList() {
+        $("#database").empty();
+        $.ajax({
+            url: "/database/list",
+            type: "GET",
+            success: function (ajaxResult) {
+                if (ajaxResult.success) {
+                    var list = ajaxResult.data;
+                    for (var i = 0; i < list.length; i++) {
+                        var taCode = list[i];
+                        $("#database").append("<option value=" + taCode + ">" + taCode + "</option>");
+                    }
+                } else {
+                    layer.msg('获取数据源列表失败', {icon: 2, time: 2500});
+                }
+            }
+        })
+    }
+
+
+    function editField(obj, j) {
+        $('#update_pop').css("display", 'block');
+        var param = {};
+        //编辑
+        var opt = obj.attr("fieldType");
+        obj.parent().prevAll().each(function (i, domObj) {
+            var field = $(domObj).attr("class");
+            var value = $(domObj).html();
+            param["update_" + opt + "_" + field] = value;
+        });
+        var tr = obj.parents(".tr");
+        var original_opt = tr.attr("opt");
+        $("#update_opt").val(original_opt);
+        $("#update_hidden").val(j);
+        changeUpdateType(opt, param);
+
+    }
+
+    function closeUpdatePop() {
+        $("#update_pop").css("display", 'none');
+    }
+
+    function closeAddPop() {
+        $("#add_pop").css("display", 'none');
+        $("#update_pop").css("display", 'none');
+    }
+
+    function closeConfirmPop() {
+        $("#confirm_pop").css("display", 'none');
+    }
+
+    function changeUpdateTypeFromChange(obj) {
+        var opt = obj.val();
+        var field = $("#update_field").val();
+        changeUpdateType(opt, getParamObj(opt), field)
+    }
+
+    function changeAddTypeFromChange(obj) {
+        var opt = obj.val();
+        var field = $("#add_field").val();
+        var increase_div = $("#add_increase_div");
+        var random_div = $("#add_random_div");
+        var constant_div = $("#add_constant_div");
+        increase_div.css("display", 'none');
+        random_div.css("display", 'none');
+        constant_div.css("display", 'none');
+        if (opt === "random") {
+            //随机字段
+            random_div.css("display", 'block');
+
+        } else if (opt === "constant") {
+            //常量字段
+            constant_div.css("display", "block");
+        } else {
+            //自增字段
+            increase_div.css("display", 'block');
+        }
+        $("#add_field").val(field);
+
+        $("#add_opt_type").val(opt);
+
+    }
+
+    function changeUpdateType(opt, param, field) {
+        var increase_div = $("#update_increase_div");
+        var random_div = $("#update_random_div");
+        var constant_div = $("#update_constant_div");
+        increase_div.css("display", 'none');
+        random_div.css("display", 'none');
+        constant_div.css("display", 'none');
+        if (opt === "random") {
+            //随机字段
+            random_div.css("display", 'block');
+
+        } else if (opt === "constant") {
+            //常量字段
+            constant_div.css("display", "block");
+        } else {
+            //自增字段
+            increase_div.css("display", 'block');
+        }
+        if (field) {
+            $("#update_field").val(field);
+        } else {
+            field = param["update_" + opt + "_field"];
+            $("#update_field").val(field);
+        }
+        for (var i in param) {
+            $("#" + i).val(param[i]);
+        }
+        $("#update_opt_type").val(opt);
+
+    }
+
+    function getParamObj(opt) {
+        if (opt === "random") {
+            return getRandomObj();
+        } else if (opt === "constant") {
+            return getConstantObj();
+        } else {
+            return getIncreaseObj();
+        }
+    }
+
+    function getRandomObj() {
+        var randomObj = {
+            random_type: 'String',
+            random_length: "",
+            random_max: "",
+            random_min: "",
+            random_isFixedLength: "",
+            random_prefix: "",
+            random_suffix: "",
+            random_isUnique: "",
+            random_characterStrategy: "0",
+            random_decimalLength: ""
+        };
+        return randomObj;
+    }
+
+    function getConstantObj() {
+        var constantObj = {
+            constant_type: "String",
+            constant_value: ""
+        };
+        return constantObj;
+    }
+
+    function getIncreaseObj() {
+        var increaseObj = {
+            increase_type: "String",
+            increase_from: "",
+            increase_length: "",
+            increase_prefix: "",
+            increase_suffix: ""
+        };
+        return increaseObj;
+    }
+
+    function deleteFiled(obj) {
+        var tr = obj.parents(".tr");
+        var field = tr.children(".field");
+        var open = layer.open({
+            content: '确定要删除' + field.html() + '吗？'
+            , btn: ['确定', '取消']
+            , yes: function (index, layero) {
+                tr.remove();
+                layer.close(open);
+            }
+            , btn2: function (index, layero) {
+
+            }
+            , cancel: function () {
+            }
+        });
+    }
+
+    function add_submit(opt) {
+        var popParam = packagePopParam("add", opt);
+        var tbody = $("#" + opt + "Tbody");
+        var num = tbody.children(".tr").length;
+        var tbodyStr = '';
+        if (opt === "increase") {
+            tbodyStr += '<tr class="tr" opt="increase">\n' +
+                '<td class="num">' + num + 1 + '</td>\n' +
+                '<td class="field" style="color: #cb0f0e;">' + popParam.field + '</td>\n' +
+                '<td class="type">' + popParam.type + '</td>\n' +
+                '<td class="from">' + popParam.from + '</td>\n' +
+                '<td class="length">' + popParam.length + '</td>\n' +
+                '<td class="prefix">' + popParam.prefix + '</td>\n' +
+                '<td class="suffix">' + popParam.suffix + '</td>\n' +
+                '<td class="option">' +
+                '<a class="a" href="javascript:void(0);" fieldType="increase" onclick="editField($(this),' + num + ')" > 编辑 </a>' +
+                '<a class="a" href="javascript:void(0);" onclick="deleteFiled($(this))" >删除 </a>';
+        } else if (opt === "random") {
+            tbodyStr += '<tr class="tr" opt="random">\n' +
+                '<td class="num">' + num + '</td>\n' +
+                '<td class="field" style="color: #cb0f0e;">' + popParam.field + '</td>\n' +
+                '<td class="type">' + popParam.type + '</td>\n' +
+                '<td class="length">' + popParam.length + '</td>\n' +
+                '<td class="max">' + popParam.max + '</td>\n' +
+                '<td class="min">' + popParam.min + '</td>\n' +
+                '<td class="isFixedLength">' + popParam.isFixedLength + '</td>\n' +
+                '<td class="prefix">' + popParam.prefix + '</td>\n' +
+                '<td class="suffix">' + popParam.suffix + '</td>\n' +
+                '<td class="isUnique">' + popParam.isUnique + '</td>\n' +
+                '<td class="characterStrategy">' + popParam.characterStrategy + '</td>\n' +
+                '<td class="decimalLength">' + popParam.decimalLength + '</td>\n' +
+                '<td class="option">' +
+                '<a class="a" href="javascript:void(0);" fieldType="random" onclick="editField($(this),' + num + ')" > 编辑 </a>' +
+                '<a class="a" href="javascript:void(0);" onclick="deleteFiled($(this))" >删除 </a>';
+            tbodyStr += '</td>\n';
+            tbodyStr += '</tr>';
+        } else {
+            tbodyStr += '<tr class="tr" opt="constant">\n' +
+                '<td class="num">' + num + '</td>\n' +
+                '<td class="field" style="color: #cb0f0e;">' + popParam.field + '</td>\n' +
+                '<td class="type">' + popParam.type + '</td>\n' +
+                '<td class="value">' + popParam.value + '</td>\n' +
+                '<td class="option">' +
+                '<a class="a" href="javascript:void(0);" fieldType="constant" onclick="editField($(this),' + num + ')" > 编辑 </a>' +
+                '<a class="a" href="javascript:void(0);" onclick="deleteFiled($(this))" >删除 </a>';
+        }
+
+        tbodyStr += '</td>\n';
+        tbodyStr += '</tr>';
+        tbody.append(tbodyStr);
+        closeAddPop();
+    }
+
+    function update_confirm() {
+        //获取当前的字段
+        var original_opt = $("#update_opt").val();
+        var current_opt = $("#update_opt_type").val();
+        var tbody = $("#" + original_opt + "Tbody");
+        var rowNum = $("#update_hidden").val();
+        var tr = $(tbody.children(".tr").get(rowNum));
+        var popParam = packagePopParam("update", current_opt);
+        console.log(popParam);
+        if (original_opt === current_opt) {
+            //更新
+            for (var i in popParam) {
+                tr.children("." + i).html(popParam[i]);
+            }
+
+        } else {
+            //删除并插入
+            var tbodyStr = "";
+            var current_tbody = $("#" + current_opt + "Tbody");
+            var num = current_tbody.children(".tr").length;
+            if (current_opt === "increase") {
+                tbodyStr += '<tr class="tr" opt="increase">\n' +
+                    '<td class="num">' + num + 1 + '</td>\n' +
+                    '<td class="field" style="color: #cb0f0e;">' + popParam.field + '</td>\n' +
+                    '<td class="type">' + popParam.type + '</td>\n' +
+                    '<td class="from">' + popParam.from + '</td>\n' +
+                    '<td class="length">' + popParam.length + '</td>\n' +
+                    '<td class="prefix">' + popParam.prefix + '</td>\n' +
+                    '<td class="suffix">' + popParam.suffix + '</td>\n' +
+                    '<td class="option">' +
+                    '<a class="a" href="javascript:void(0);" fieldType="increase" onclick="editField($(this),' + num + ')" > 编辑 </a>' +
+                    '<a class="a" href="javascript:void(0);" onclick="deleteFiled($(this))" >删除 </a>';
+            } else if (current_opt === "random") {
+                tbodyStr += '<tr class="tr" opt="random">\n' +
+                    '<td class="num">' + num + '</td>\n' +
+                    '<td class="field" style="color: #cb0f0e;">' + popParam.field + '</td>\n' +
+                    '<td class="type">' + popParam.type + '</td>\n' +
+                    '<td class="length">' + popParam.length + '</td>\n' +
+                    '<td class="max">' + popParam.max + '</td>\n' +
+                    '<td class="min">' + popParam.min + '</td>\n' +
+                    '<td class="isFixedLength">' + popParam.isFixedLength + '</td>\n' +
+                    '<td class="prefix">' + popParam.prefix + '</td>\n' +
+                    '<td class="suffix">' + popParam.suffix + '</td>\n' +
+                    '<td class="isUnique">' + popParam.isUnique + '</td>\n' +
+                    '<td class="characterStrategy">' + popParam.characterStrategy + '</td>\n' +
+                    '<td class="decimalLength">' + popParam.decimalLength + '</td>\n' +
+                    '<td class="option">' +
+                    '<a class="a" href="javascript:void(0);" fieldType="random" onclick="editField($(this),' + num + ')" > 编辑 </a>' +
+                    '<a class="a" href="javascript:void(0);" onclick="deleteFiled($(this))" >删除 </a>';
+                tbodyStr += '</td>\n';
+                tbodyStr += '</tr>';
+            } else {
+                tbodyStr += '<tr class="tr" opt="constant">\n' +
+                    '<td class="num">' + num + '</td>\n' +
+                    '<td class="field" style="color: #cb0f0e;">' + popParam.field + '</td>\n' +
+                    '<td class="type">' + popParam.type + '</td>\n' +
+                    '<td class="value">' + popParam.value + '</td>\n' +
+                    '<td class="option">' +
+                    '<a class="a" href="javascript:void(0);" fieldType="constant" onclick="editField($(this),' + num + ')" > 编辑 </a>' +
+                    '<a class="a" href="javascript:void(0);" onclick="deleteFiled($(this))" >删除 </a>';
+            }
+
+            tbodyStr += '</td>\n';
+            tbodyStr += '</tr>';
+            current_tbody.append(tbodyStr);
+            $(tbody.children(".tr").get(rowNum)).remove();
+        }
+
+
+        var insertParam = packageParam();
+        renderTable(insertParam);
+
+        closeUpdatePop();
+    }
+
+    function packagePopParam(type, opt) {
+        var obj = {};
+        obj.field = $("#" + type + "_field").val();
+        if (opt === "constant") {
+            obj.type = $("#" + type + "_constant_type").val();
+            obj.value = $("#" + type + "_constant_value").val();
+        } else if (opt === "increase") {
+            obj.type = $("#" + type + "_increase_type").val();
+            obj.from = $("#" + type + "_increase_from").val();
+            obj.length = $("#" + type + "_increase_length").val();
+            obj.prefix = $("#" + type + "_increase_prefix").val();
+            obj.suffix = $("#" + type + "_increase_suffix").val();
+        } else {
+            obj.characterStrategy = $("#" + type + "_random_characterStrategy").val();
+            obj.decimalLength = $("#" + type + "_random_decimalLength").val();
+            obj.isFixedLength = $("#" + type + "_random_isFixedLength").val();
+            obj.isUnique = $("#" + type + "_random_isUnique").val();
+            obj.length = $("#" + type + "_random_length").val();
+            obj.max = $("#" + type + "_random_max").val();
+            obj.min = $("#" + type + "_random_min").val();
+            obj.prefix = $("#" + type + "_random_prefix").val();
+            obj.suffix = $("#" + type + "_random_suffix").val();
+            obj.type = $("#" + type + "_random_type").val();
+        }
+        return obj;
+    }
+
+
+    //将所有表格数据封装为参数
+    function packageParam() {
+        var insertParam = {};
+        //封装random参数
+        var random = {};
+        var randomTr = $("#randomTbody").children(".tr");
+        randomTr.each(function (i, dom) {
+            var tr = $(dom);
+            var nothing = tr.children(".nothing");
+            if (!nothing.html()) {
+                var field = tr.children(".field").html();
+                var type = tr.children(".type").html();
+                var length = tr.children(".length").html();
+                var max = tr.children(".max").html();
+                var min = tr.children(".min").html();
+                var isFixedLength = tr.children(".isFixedLength").html();
+                var prefix = tr.children(".prefix").html();
+                var suffix = tr.children(".suffix").html();
+                var isUnique = tr.children(".isUnique").html();
+                var characterStrategy = tr.children(".characterStrategy").html();
+                var decimalLength = tr.children(".decimalLength").html();
+                random[field] = type + "|" + length + "|" + max + "|" + min + "|" + isFixedLength + "|" + prefix + "|" + suffix + "|" + isUnique + "|" + characterStrategy + "|" + decimalLength;
+            }
+
+        });
+
+        //封装increase参数
+        var increase = {};
+        var increaseTr = $("#increaseTbody").children(".tr");
+        increaseTr.each(function (i, dom) {
+            var tr = $(dom);
+            var nothing = tr.children(".nothing");
+            if (!nothing.html()) {
+                var field = tr.children(".field").html();
+                var type = tr.children(".type").html();
+                var from = tr.children(".from").html();
+                var length = tr.children(".length").html();
+                var prefix = tr.children(".prefix").html();
+                var suffix = tr.children(".suffix").html();
+                increase[field] = type + "|" + from + "|" + length + "|" + prefix + "|" + suffix;
+            }
+        });
+
+        //封装constant参数
+        var constant = {};
+        var constantTr = $("#constantTbody").children(".tr");
+        constantTr.each(function (i, dom) {
+            var tr = $(dom);
+            var nothing = tr.children(".nothing");
+            if (!nothing.html()) {
+                var field = tr.children(".field").html();
+                var type = tr.children(".type").html();
+                var value = tr.children(".value").html();
+                constant[field] = type + "|" + value;
+            }
+        });
+        insertParam.constant = constant;
+        insertParam.random = random;
+        insertParam.increase = increase;
+        return insertParam;
+    }
+
+    function back() {
+        window.location.href = getServerHost() + "/main";
+    }
+
+    function getServerHost() {
+        //获取当前网址，
+        var curPath = window.document.location.href;
+        var pathName = window.document.location.pathname;
+        var pos = curPath.indexOf(pathName);
+        //获取主机地址
+        return curPath.substring(0, pos);
+    }
+
+    function saveParam() {
+        var load = layer.load(2, {shade: [0.2, '#DDDDDD']});
+        var insertParam = packageParam();
+        insertParam.database = $("#database").val();
+        insertParam.tableName = $("#tableName").val();
+        $.ajax({
+            type: 'POST',
+            data: JSON.stringify(insertParam),
+            url: '/history',
+            contentType: 'application/json;charset=UTF-8',
+            dataType: 'json',
+            success: function (ajaxResult) {
+                layer.close(load);
+                if (ajaxResult.success) {
+                    layer.msg('修改成功！', {icon: 1, time: 1500});
+                } else {
+                    layer.msg("修改失败," + ajaxResult.data, {icon: 2, time: 2500});
+                }
+            }
+        });
+
+    }
+
+    function saveAndInsert() {
+        $("#confirm_pop").css("display", 'block');
+    }
+
+    function insert_confirm() {
+        var load = layer.load(2, {shade: [0.2, '#DDDDDD']});
+        var insertParam = packageParam();
+        insertParam.database = $("#database").val();
+        insertParam.tableName = $("#tableName").val();
+        insertParam.num = $("#row_num").val();
+        $.ajax({
+            type: 'POST',
+            data: JSON.stringify(insertParam),
+            url: '/insert',
+            contentType: 'application/json;charset=UTF-8',
+            dataType: 'json',
+            success: function (ajaxResult) {
+                layer.close(load);
+                if (ajaxResult.success) {
+                    layer.msg('数据生成成功！', {icon: 1, time: 1500});
+                    closeConfirmPop();
+                } else {
+                    layer.msg("数据生成失败," + ajaxResult.data, {icon: 2, time: 2500});
+                }
+            }
+        });
+    }
+
+</script>
+</html>

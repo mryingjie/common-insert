@@ -105,7 +105,7 @@ public class JsonFormatTool
             }
 
             //4、如果当前字符是逗号。逗号后面换行，并缩进，不改变缩进次数。
-            if((key == ','))
+            if((key == ',' && (json.charAt(i - 1) == '}' || json.charAt(i - 1) == ']' || json.charAt(i+1) == '"') ))
             {
                 result.append(key);
                 result.append('\n');

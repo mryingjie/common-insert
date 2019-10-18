@@ -17,6 +17,7 @@ import java.lang.reflect.Field;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -24,7 +25,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 @Configuration
 @Slf4j
-public class SQLExecutorConfig {
+public class SQLExecutorConfig{
 
     public Map<String, DataSource> dataSourceMap;
 
@@ -110,5 +111,9 @@ public class SQLExecutorConfig {
         DatasourceFileUtil.write(DATA_SOURCE_FILE_NAME, JsonFormatTool.formatJson(json));
 
 
+    }
+
+    public Set<String> databaseList() {
+        return dataSourcePropertiesMap.keySet();
     }
 }

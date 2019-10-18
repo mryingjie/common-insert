@@ -75,6 +75,10 @@ public enum  FieldType implements ConvertStrategy {
         }
     }
 
+    public String getValue(){
+        return this.value;
+    }
+
 
     public static FieldType getByValue(String typeValue){
         return map.get(typeValue);

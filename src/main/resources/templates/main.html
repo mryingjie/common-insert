@@ -16,7 +16,7 @@
 <body class="layui-layout-body">
 <div class="container">
     <div class="content">
-        <h1 class="local_area">数据插入表单</h1>
+        <h1 class="local_area">数据插入表单>列表</h1>
         <form class="layui-form" action="">
             <div class="search border main-search">
                 <h2 class="local_area" style="font-size: 20px;font-weight: lighter">历史数据参数模板列表</h2>
@@ -48,12 +48,34 @@
                 <hr style="color:#2b82de;background-color: rgba(43,130,222,0) ;height: 2px;border: none">
 
                 <div class="clear"></div>
+                <div class="s_btn cancel_submit_btn" onclick="addParam()" style="float: right">
+                    <label>新增</label>
+                </div>
+                <div class="s_btn confirm_submit_btn" onclick="openSqlPop()" style="float: right">
+                    <label>建表语句</label>
+                </div>
             </div>
 
         </form>
 
         <!-- content end -->
     </div>
+
+    <div class="pop" id="sql_pop" style="display:none; width: 150px;">
+        <div class="pop_bg"></div><!--遮罩-->
+        <div class="pop_box info-jk" style="width: 60%;background:white" id="sql_pop_box">
+            <div class="s_one inputs_item" type="input">
+                <label style="width: 200px">请输入建表语句(create sql):<span style="color: red; ">*</span></label>
+                <textarea name="sql" id="sql" cols="92" rows="10" style="OVERFLOW:visible"></textarea>
+            </div>
+            <div class="clear"></div>
+            <div class="pagelistwrapper"></div>
+            <div class="s_btn " onclick="closePop()" style="float: right">取消</div>
+            <div class="s_btn bg_red left mr30 submit_btn" onclick="sql_confirm()" style="float: right">确认
+            </div>
+        </div>
+    </div>
+
     <!-- container end -->
 </div>
 </body>
@@ -72,7 +94,7 @@
     function queryHistory() {
 
         $.ajax({
-            url: "/datasource/" + status,
+            url: "/history/list",
             type: "GET",
             success: function (ajaxResult) {
                 layer.closeAll();
@@ -82,18 +104,18 @@
                     var tbody = $("#tbody");
                     tbody.empty();
                     if (data.length === 0) {
-                        tbody.html("<tr><td style='color:green;text-align: left' colspan='20'>Nothing to show！</td></tr>");
+                        tbody.html("<tr><td style='color:green;text-align: center' colspan='20'>Nothing to show！</td></tr>");
                     } else {
                         var tbodyStr = "";
                         for (var i = 0; i < data.length; i++) {
                             var info = data[i];
                             tbodyStr += '<tr>\n' +
                                 '<td>' + (i + 1) + '</td>\n' +
-                                '<td class="tableName">' + info.database + '</td>\n' +
-                                '<td class="database">' + info.type + '</td>\n' +
+                                '<td class="tableName">' + info.tableName + '</td>\n' +
+                                '<td class="database">' + info.database + '</td>\n' +
                                 '<td class="option">' +
-                                '<a class="a" href="javascript:void(0);" onclick="deleteDatasource($(this))" tableName="' + info.tableName + '" >详情 </a>' +
-                                '<a class="a" href="javascript:void(0);" onclick="updateDatasource($(this))" > 删除 </a>';
+                                '<a class="a" href="javascript:void(0);" onclick="paramDetail($(this))" tableName="' + info.tableName + '" >详情 </a>' +
+                                '<a class="a" href="javascript:void(0);" onclick="deleteParam($(this))" tableName="' + info.tableName + '" > 删除 </a>';
                             tbodyStr += '</td>\n';
                             tbodyStr += '</tr>';
                         }
@@ -105,6 +127,81 @@
             }
         });
 
+    }
+
+    function deleteParam(obj) {
+        var tableName = obj.attr('tableName');
+        layer.load(2, {shade: [0.2, '#DDDDDD']});
+        layer.open({
+            content: '确定要删除' + tableName + '吗？'
+            , btn: ['确定', '取消']
+            , yes: function (index, layero) {
+                $.ajax({
+                    url: "/history/" + tableName,
+                    type: "DELETE",
+                    contentType: 'application/json;charset=UTF-8',
+                    dataType: 'json',
+                    success: function (ajaxResult) {
+                        layer.closeAll();
+                        if (!ajaxResult.success) {
+                            layer.msg(ajaxResult.data, {icon: 2, time: 2500});
+                        }
+                        queryHistory();
+                    }
+                });
+            }
+            , btn2: function (index, layero) {
+
+            }
+            , cancel: function () {
+            }
+        });
+
+
+    }
+
+    function paramDetail(obj) {
+        window.location.href = getServerHost() + "/insertPage/" + obj.attr("tableName");
+    }
+
+    function addParam() {
+        window.location.href = getServerHost() + "/insertPage/" + "default";
+    }
+
+    function getServerHost() {
+        //获取当前网址，
+        var curPath = window.document.location.href;
+        var pathName = window.document.location.pathname;
+        var pos = curPath.indexOf(pathName);
+        //获取主机地址
+        return curPath.substring(0, pos);
+    }
+
+    function openSqlPop() {
+        $("#sql_pop").css("display", "block");
+    }
+
+    function closePop() {
+        $("#sql_pop").css("display", "none");
+    }
+
+    function sql_confirm() {
+        var load = layer.load(2, {shade: [0.2, '#DDDDDD']});
+        var sql = $("#sql").val();
+        $.ajax({
+            url: "/transform/sql",
+            type: "POST",
+            data: {sql: sql},
+            success: function (ajaxResult) {
+                layer.close(load);
+                if (ajaxResult.success) {
+                    var tableName = ajaxResult.data;
+                    window.location.href = getServerHost() + "/insertPage/" + tableName;
+                } else {
+                    layer.msg(ajaxResult.data, {icon: 2, time: 2500});
+                }
+            }
+        });
     }
 
 </script>

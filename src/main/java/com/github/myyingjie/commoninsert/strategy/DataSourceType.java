@@ -1,6 +1,7 @@
 package com.github.myyingjie.commoninsert.strategy;
 
 import com.github.myyingjie.commoninsert.bean.DataSourceProperties;
+import com.github.myyingjie.commoninsert.exception.BizException;
 import com.heitaox.sql.executor.source.DataSource;
 import com.heitaox.sql.executor.source.file.ExcelDataSource;
 import com.heitaox.sql.executor.source.nosql.ElasticsearchDataSource;
@@ -100,7 +101,7 @@ public enum DataSourceType {
             }
 
         }
-        throw new RuntimeException("not support this type of data source:[{" + type + "}]");
+        throw new BizException("not support this type of data source:[{" + type + "}]");
     }
 
 }

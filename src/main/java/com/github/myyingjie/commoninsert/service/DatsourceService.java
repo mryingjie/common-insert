@@ -7,6 +7,7 @@ import com.github.myyingjie.commoninsert.bean.InsertParam;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Set;
 
 /**
  * created by Yingjie Zheng at 2019-09-27 11:12
@@ -23,4 +24,6 @@ public interface DatsourceService {
     void addDatasource(DataSourceProperties dataSourceProperties) throws Exception;
 
     void persistence(String database) throws IOException;
+
+    Set<String> queryDatabase();
 }
