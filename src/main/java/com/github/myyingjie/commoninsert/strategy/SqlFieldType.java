@@ -24,7 +24,7 @@ public enum SqlFieldType {
 
     DOUBLE("double",FieldType.DOUBLE),
 
-    FLOAD("fload",FieldType.DOUBLE),
+    FLOAT("float",FieldType.DOUBLE),
 
     DECIMAL("decimal", FieldType.DECIMAL),
 
