@@ -49,7 +49,7 @@ public class RandomUtil {
                 sb = new StringBuilder();
                 for (int i = 0; ; i++) {
                     if (i >= minVal.length() - 1) {
-                        if (random.nextInt(2) == 1) {
+                        if (random.nextInt(2) == 1&& sb.length() > 0) {
                             break;
                         }
                     }
@@ -71,7 +71,7 @@ public class RandomUtil {
                 sb = new StringBuilder();
                 for (int i = 0; i < maxVal.length(); i++) {
                     if (i >= minVal.length() - 1) {
-                        if (random.nextInt(2) == 1) {
+                        if (random.nextInt(2) == 1 && sb.length() > 0) {
                             break;
                         }
                     }
@@ -207,16 +207,17 @@ public class RandomUtil {
             //生成一个65-90之间的int类型整数--为了生成大写字母
             intVal = (int) (random.nextDouble() * 26 + 65);
         }
-        return String.valueOf((char)intVal);
+        return String.valueOf((char) intVal);
     }
 
     /**
      * 随机生成指定个数的字母
+     *
      * @param random
      * @param num
      * @return
      */
-    public static String randomAlphabet(Random random,int num){
+    public static String randomAlphabet(Random random, int num) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < num; i++) {
             sb.append(randomAlphabet(random));
